@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Calorieën">
+<title>Calorie Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; background: #0a0a1a; color: #fff; }
+
+  .bg-gradient {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 20% 20%, rgba(120,80,255,0.35) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 10%, rgba(0,180,255,0.25) 0%, transparent 45%),
+                radial-gradient(ellipse at 60% 80%, rgba(255,80,180,0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 10% 70%, rgba(0,255,180,0.15) 0%, transparent 40%),
+                #0a0a1a;
+    animation: bgShift 12s ease-in-out infinite alternate;
+  }
+  @keyframes bgShift { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(20deg) brightness(1.1); } }
+
+  .glass { background: rgba(255,255,255,0.08); backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%); border: 1px solid rgba(255,255,255,0.18); border-bottom-color: rgba(255,255,255,0.06); border-right-color: rgba(255,255,255,0.06); box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 8px 32px rgba(0,0,0,0.3); }
+  .glass-dark { background: rgba(0,0,0,0.25); backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%); border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
+
+  /* Header */
+  .header {
+    padding: 54px 20px 0;
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,26,0.7);
+    backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; }
+  .app-title { font-size: 24px; font-weight: 700; letter-spacing: -0.8px; background: linear-gradient(135deg, #fff 0%, rgba(200,160,255,0.9) 50%, rgba(100,200,255,0.8) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .sheet-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; color: rgba(200,160,255,1); cursor: pointer; text-decoration: none; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); }
+  .date-nav { display: flex; align-items: center; gap: 4px; }
+  .date-nav-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 50%; width: 26px; height: 26px; color: rgba(255,255,255,0.6); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; }
+  .date-nav-btn:active { background: rgba(255,255,255,0.18); }
+  .date-label { font-size: 11px; color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; white-space: nowrap; min-width: 72px; text-align: center; }
+
+  /* Tabs */
+  .tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; padding: 8px 0; }
+  .tab-btn { background: transparent; border: none; color: rgba(255,255,255,0.35); font-family: -apple-system, 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 8px 4px; cursor: pointer; position: relative; transition: color 0.2s; letter-spacing: 0.01em; }
+  .tab-btn.active { color: rgba(255,255,255,0.95); }
+  .tab-btn::after { content: ''; position: absolute; bottom: 0; left: 20%; right: 20%; height: 2px; border-radius: 99px; background: linear-gradient(90deg, rgba(140,90,255,0.9), rgba(80,160,255,0.9)); opacity: 0; transition: opacity 0.2s; }
+  .tab-btn.active::after { opacity: 1; }
+
+  /* Pages */
+  .page { display: none; padding: 16px; padding-bottom: 40px; position: relative; z-index: 1; }
+  .page.active { display: flex; flex-direction: column; gap: 14px; }
+
+  /* Cards */
+  .card { border-radius: 22px; padding: 18px; }
+  .card-title { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.4); margin-bottom: 14px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* HERO */
+  .hero-card { border-radius: 26px; padding: 28px 20px 22px; text-align: center; position: relative; overflow: hidden; }
+  .hero-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(120,80,255,0.12), rgba(0,180,255,0.08)); pointer-events: none; }
+  .hero-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 10px; }
+  .hero-num { font-size: 80px; font-weight: 700; letter-spacing: -5px; line-height: 1; margin-bottom: 6px; transition: all 0.4s; }
+  .hero-num.ok { background: linear-gradient(135deg, #50dc8c, #00c6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero-num.warn { background: linear-gradient(135deg, #ffb432, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero-num.danger { background: linear-gradient(135deg, #ff5050, #ff0080); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero-sub { font-size: 14px; color: rgba(255,255,255,0.4); }
+  .hero-doel { font-size: 12px; color: rgba(255,255,255,0.2); margin-top: 6px; }
+  .progress-wrap { height: 5px; border-radius: 99px; background: rgba(255,255,255,0.08); overflow: hidden; margin-top: 18px; }
+  .progress-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, rgba(120,80,255,0.9), rgba(100,200,255,0.9)); transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 0 8px rgba(120,80,255,0.5); }
+  .progress-bar.warn { background: linear-gradient(90deg, #ffb432, #ff8c00); box-shadow: 0 0 8px rgba(255,140,0,0.5); }
+  .progress-bar.danger { background: linear-gradient(90deg, #ff5050, #ff0080); box-shadow: 0 0 8px rgba(255,0,80,0.5); }
+
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .stat-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 10px 12px; }
+  .stat-num { font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.85); letter-spacing: -0.5px; }
+  .stat-label { font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+  /* Maaltijdlijst (overzicht tab) */
+  .maaltijd-lijst { display: flex; flex-direction: column; gap: 6px; }
+  .maaltijd-rij { display: flex; align-items: flex-start; justify-content: space-between; padding: 12px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; gap: 10px; }
+  .maaltijd-left { flex: 1; min-width: 0; }
+  .maaltijd-naam { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.85); margin-bottom: 4px; }
+  .maaltijd-sub { font-size: 12px; color: rgba(255,255,255,0.3); line-height: 1.5; }
+  .maaltijd-kcal { font-size: 14px; font-weight: 700; color: rgba(160,120,255,1); white-space: nowrap; padding-top: 2px; }
+  .maaltijd-leeg .maaltijd-naam { color: rgba(255,255,255,0.2); font-weight: 400; }
+  .dag-loading { font-size: 13px; color: rgba(255,255,255,0.3); text-align: center; padding: 20px; }
+  .dag-refresh { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; width: 30px; height: 30px; color: rgba(255,255,255,0.5); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; flex-shrink: 0; }
+  .dag-refresh:active { transform: rotate(180deg); }
+
+  /* Form */
+  label { display: block; font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 6px; font-weight: 500; }
+  input, select, textarea { width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: rgba(255,255,255,0.9); font-family: -apple-system, 'DM Sans', sans-serif; font-size: 15px; padding: 12px 14px; outline: none; transition: all 0.2s; -webkit-appearance: none; appearance: none; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
+  input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.2); }
+  input:focus, textarea:focus { border-color: rgba(160,120,255,0.5); background: rgba(160,120,255,0.08); box-shadow: 0 0 0 3px rgba(160,120,255,0.12); }
+  textarea { resize: none; height: 80px; line-height: 1.5; }
+  .field { margin-bottom: 12px; }
+  .num-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .num-row input { text-align: center; font-size: 20px; font-weight: 600; }
+
+  .seg-control { display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(0,0,0,0.2); border-radius: 12px; padding: 3px; gap: 2px; border: 1px solid rgba(255,255,255,0.08); }
+  .seg-btn { padding: 8px 4px; border-radius: 9px; border: none; background: transparent; color: rgba(255,255,255,0.4); font-family: -apple-system, 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .seg-btn.active { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.95); box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); }
+
+  .btn-primary { width: 100%; background: linear-gradient(135deg, rgba(140,90,255,0.9), rgba(80,160,255,0.9)); border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 15px; color: #fff; font-family: -apple-system, 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 4px 16px rgba(120,80,255,0.3); }
+  .btn-primary:active { transform: scale(0.97); opacity: 0.85; }
+  .btn-primary:disabled { opacity: 0.35; }
+  .btn-secondary { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); border-radius: 14px; padding: 14px; color: rgba(255,255,255,0.8); font-family: -apple-system, 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .btn-secondary:active { transform: scale(0.97); background: rgba(255,255,255,0.12); }
+  .btn-secondary:disabled { opacity: 0.35; }
+  .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+
+  .status { border-radius: 12px; padding: 12px 14px; font-size: 13px; font-weight: 500; display: none; line-height: 1.4; margin-top: 12px; }
+  .status.ok { background: rgba(80,220,140,0.12); color: #50dc8c; display: block; border: 1px solid rgba(80,220,140,0.2); }
+  .status.err { background: rgba(255,80,80,0.1); color: #ff7070; display: block; border: 1px solid rgba(255,80,80,0.2); }
+  .status.loading { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); display: block; border: 1px solid rgba(255,255,255,0.08); }
+  .toelichting { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 10px; padding: 8px 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; line-height: 1.5; display: none; }
+  .toelichting.show { display: block; }
+
+  /* Settings */
+  .collapsible { overflow: hidden; max-height: 0; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
+  .collapsible.open { max-height: 800px; }
+  .settings-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; color: rgba(255,255,255,0.4); font-size: 13px; font-weight: 600; user-select: none; }
+  .chevron { display: inline-block; transition: transform 0.3s; font-size: 16px; color: rgba(255,255,255,0.3); }
+  .settings-toggle.open .chevron { transform: rotate(180deg); }
+  .settings-inner { padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.07); margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+  .key-note { font-size: 11px; color: rgba(255,255,255,0.25); margin-top: 5px; }
+</style>
+</head>
+<body>
+<div class="bg-gradient"></div>
+
+<div style="position:relative; z-index:1;">
+  <div class="header">
+    <div class="header-top">
+      <div class="app-title">Calorieën</div>
+      <div class="header-right">
+        <a class="sheet-btn" id="sheetLink" href="https://docs.google.com/spreadsheets/d/1VVEAaCSI2A1j_YSIcr1lWiIDmmACVgI_1DZK0o7tTqg/edit" target="_blank">↗ Sheet</a>
+        <div class="date-nav">
+          <button class="date-nav-btn" onclick="changeDate(-1)">‹</button>
+          <div class="date-label" id="dateLabel">Vandaag</div>
+          <button class="date-nav-btn" onclick="changeDate(1)">›</button>
+        </div>
+        <input type="date" id="datum" style="display:none;" onchange="onDatumChange()" />
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('vandaag', this)">Vandaag</button>
+      <button class="tab-btn" onclick="switchTab('invoeren', this)">Invoeren</button>
+      <button class="tab-btn" onclick="switchTab('overzicht', this)">Overzicht</button>
+    </div>
+  </div>
+
+  <!-- TAB 1: Vandaag -->
+  <div class="page active" id="tab-vandaag">
+
+    <div class="card glass hero-card">
+      <div class="hero-label">Nog te eten vandaag</div>
+      <div class="hero-num ok" id="heroNum">—</div>
+      <div class="hero-sub" id="heroSub">kcal</div>
+      <div class="hero-doel" id="heroDoel">Laden...</div>
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-num" id="statGegeten">—</div>
+          <div class="stat-label">gegeten</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="statEiwit">—</div>
+          <div class="stat-label">g eiwit</div>
+        </div>
+      </div>
+    </div>
+
+
+
+  </div>
+
+  <!-- TAB 2: Invoeren -->
+  <div class="page" id="tab-invoeren">
+
+    <div class="card glass">
+      <div class="card-title">Maaltijd invoeren</div>
+
+      <div class="field">
+        <label>Maaltijdmoment</label>
+        <div class="seg-control">
+          <button class="seg-btn" onclick="setMaaltijd('Ontbijt',this)">Ontbijt</button>
+          <button class="seg-btn active" onclick="setMaaltijd('Lunch',this)">Lunch</button>
+          <button class="seg-btn" onclick="setMaaltijd('Avondeten',this)">Avond</button>
+          <button class="seg-btn" onclick="setMaaltijd('Snack',this)">Snack</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Wat heb je gegeten? (één item per regel)</label>
+        <textarea id="eten" placeholder="chocoladecroissant&#10;cappuccino&#10;glas melk"></textarea>
+      </div>
+
+      <div class="num-row">
+        <div>
+          <label>Calorieën (kcal)</label>
+          <input type="number" id="kcal" placeholder="450" inputmode="numeric" />
+        </div>
+        <div>
+          <label>Eiwitten (g)</label>
+          <input type="number" id="eiwitten" placeholder="20" inputmode="numeric" />
+        </div>
+      </div>
+
+      <div class="toelichting" id="toelichting"></div>
+
+      <div class="btn-group">
+        <button class="btn-secondary" id="btnOpzoeken" onclick="opzoeken()">🔍 Calorieën automatisch opzoeken</button>
+        <button class="btn-primary" id="btnInvoeren" onclick="invoeren()">↑ In sheet invoeren</button>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+
+  </div>
+
+  <!-- TAB 3: Overzicht -->
+  <div class="page" id="tab-overzicht">
+
+    <div class="card glass">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+        <div class="card-title" style="margin-bottom:0">Maaltijden van de dag</div>
+        <button class="dag-refresh" onclick="laadDag()" title="Vernieuwen">↻</button>
+      </div>
+      <div id="dagContent"><div class="dag-loading">Vul je API keys in bij Instellingen</div></div>
+    </div>
+
+    <!-- Instellingen -->
+    <div class="card glass-dark">
+      <div class="settings-toggle" id="settingsToggle" onclick="toggleSettings()">
+        <span>⚙️ Instellingen</span>
+        <span class="chevron">⌄</span>
+      </div>
+      <div class="collapsible" id="settingsPanel">
+        <div class="settings-inner">
+          <div class="field">
+            <label>Anthropic API Key</label>
+            <input type="password" id="anthropicKey" placeholder="sk-ant-..." autocomplete="off" />
+            <p class="key-note">🔒 Alleen lokaal opgeslagen</p>
+          </div>
+          <div class="field">
+            <label>Google Sheets API Key</label>
+            <input type="password" id="googleKey" placeholder="AIzaSy..." autocomplete="off" />
+            <p class="key-note">🔒 Alleen lokaal opgeslagen</p>
+          </div>
+          <div class="field">
+            <label>Spreadsheet ID</label>
+            <input type="text" id="sheetId" value="1VVEAaCSI2A1j_YSIcr1lWiIDmmACVgI_1DZK0o7tTqg" autocomplete="off" />
+          </div>
+          <button class="btn-primary" onclick="saveSettings()">Opslaan</button>
+          <div class="status" id="settingsStatus"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SHEET_NAME = 'Blad1';
+const DAYS_NL = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+const MONTHS_NL = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+const MAALTIJDEN = ['Ontbijt','Lunch','Avondeten','Snack'];
+let selectedMaaltijd = 'Lunch';
+
+function init() {
+  const d = new Date();
+  const iso = d.toISOString().split('T')[0];
+  document.getElementById('datum').value = iso;
+  updateDatumLabel(iso);
+  const ak = localStorage.getItem('ct_anthropic_key');
+  const gk = localStorage.getItem('ct_google_key');
+  const sid = localStorage.getItem('ct_sheetid');
+  if (ak) document.getElementById('anthropicKey').value = ak;
+  if (gk) document.getElementById('googleKey').value = gk;
+  if (sid) { document.getElementById('sheetId').value = sid; document.getElementById('sheetLink').href = `https://docs.google.com/spreadsheets/d/${sid}/edit`; }
+  if (gk && (sid || document.getElementById('sheetId').value)) laadDag();
+}
+
+function updateDatumLabel(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const date = new Date(y, m-1, d);
+  const today = new Date();
+  const isToday = date.toDateString() === today.toDateString();
+  const label = isToday ? 'Vandaag' : DAYS_NL[date.getDay()].charAt(0).toUpperCase() + DAYS_NL[date.getDay()].slice(1) + ' ' + d + ' ' + MONTHS_NL[m-1];
+  document.getElementById('dateLabel').textContent = label;
+}
+
+function onDatumChange() {
+  const iso = document.getElementById('datum').value;
+  updateDatumLabel(iso);
+  laadDag();
+}
+
+function changeDate(delta) {
+  const iso = document.getElementById('datum').value;
+  const d = new Date(iso);
+  d.setDate(d.getDate() + delta);
+  const newIso = d.toISOString().split('T')[0];
+  document.getElementById('datum').value = newIso;
+  updateDatumLabel(newIso);
+  laadDag();
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function toggleSettings() {
+  document.getElementById('settingsPanel').classList.toggle('open');
+  document.getElementById('settingsToggle').classList.toggle('open');
+}
+
+function saveSettings() {
+  const sid = document.getElementById('sheetId').value.trim();
+  localStorage.setItem('ct_anthropic_key', document.getElementById('anthropicKey').value.trim());
+  localStorage.setItem('ct_google_key', document.getElementById('googleKey').value.trim());
+  localStorage.setItem('ct_sheetid', sid);
+  document.getElementById('sheetLink').href = `https://docs.google.com/spreadsheets/d/${sid}/edit`;
+  const el = document.getElementById('settingsStatus');
+  el.textContent = '✓ Instellingen opgeslagen!';
+  el.className = 'status ok';
+  setTimeout(() => {
+    document.getElementById('settingsPanel').classList.remove('open');
+    document.getElementById('settingsToggle').classList.remove('open');
+    el.className = 'status';
+    laadDag();
+  }, 1000);
+}
+
+function setMaaltijd(val, btn) {
+  selectedMaaltijd = val;
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+}
+
+function dutchDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const date = new Date(y, m-1, d);
+  return DAYS_NL[date.getDay()] + ' ' + d + ' ' + MONTHS_NL[m-1];
+}
+
+function formatAsBullets(text) {
+  return text.split('\n').map(r => r.trim()).filter(r => r.length > 0).map(r => r.startsWith('-') ? r : '- ' + r).join('\n');
+}
+
+async function laadDag() {
+  const googleKey = localStorage.getItem('ct_google_key') || '';
+  const sheetId = localStorage.getItem('ct_sheetid') || document.getElementById('sheetId').value.trim();
+  const datum = document.getElementById('datum').value;
+  const dagContent = document.getElementById('dagContent');
+
+  if (!googleKey || !sheetId) {
+    dagContent.innerHTML = '<div class="dag-loading">Vul je API keys in bij Instellingen</div>';
+    document.getElementById('heroDoel').textContent = 'Vul API keys in bij Instellingen';
+    return;
+  }
+
+  dagContent.innerHTML = '<div class="dag-loading">Laden...</div>';
+
+  try {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${SHEET_NAME}?key=${googleKey}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('Sheet niet bereikbaar. Controleer je Google API key.');
+    const data = await resp.json();
+    const rows = data.values || [];
+    const doel = parseInt((rows[1] && rows[1][1]) ? rows[1][1] : '2300') || 2300;
+    const zoekDatum = dutchDate(datum);
+    let dagData = {};
+    let gevonden = false;
+
+    for (let i = 0; i < rows.length; i++) {
+      const cel = (rows[i][1] || '').toLowerCase().trim();
+      if (!cel) continue;
+      const parts = zoekDatum.toLowerCase().split(' ');
+      if (cel.includes(parts[0]) && cel.includes(parts[1])) {
+        gevonden = true;
+        for (let j = i; j < Math.min(i+10, rows.length); j++) {
+          const maaltijd = (rows[j][3] || '').trim();
+          if (MAALTIJDEN.includes(maaltijd)) {
+            dagData[maaltijd] = { eten: rows[j][4] || '', kcal: parseInt(rows[j][6]) || 0, eiwitten: parseInt(rows[j][5]) || 0 };
+          }
+        }
+        break;
+      }
+    }
+
+    if (!gevonden) {
+      dagContent.innerHTML = '<div class="dag-loading">Geen data voor deze datum</div>';
+      updateHero(0, doel, 0);
+      return;
+    }
+
+    const totaalKcal = Object.values(dagData).reduce((s,m) => s + m.kcal, 0);
+    const totaalEiwit = Object.values(dagData).reduce((s,m) => s + m.eiwitten, 0);
+    updateHero(totaalKcal, doel, totaalEiwit);
+
+    const maaltijdHTML = MAALTIJDEN.map(m => {
+      const info = dagData[m];
+      if (info && info.kcal > 0) {
+        const etenFormatted = info.eten.split('\n').map(r => r.trim()).filter(r => r).map(r => `<div>${r.startsWith('-') ? r : '- ' + r}</div>`).join('');
+        return `<div class="maaltijd-rij">
+          <div class="maaltijd-left">
+            <div class="maaltijd-naam">${m}</div>
+            <div class="maaltijd-sub">${etenFormatted}</div>
+          </div>
+          <div class="maaltijd-kcal">${info.kcal} kcal</div>
+        </div>`;
+      }
+      return `<div class="maaltijd-rij maaltijd-leeg">
+        <div class="maaltijd-left"><div class="maaltijd-naam">${m}</div></div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.2);">—</div>
+      </div>`;
+    }).join('');
+
+    dagContent.innerHTML = `<div class="maaltijd-lijst">${maaltijdHTML}</div>`;
+  } catch(e) {
+    dagContent.innerHTML = `<div class="dag-loading">Fout: ${e.message}</div>`;
+    document.getElementById('heroDoel').textContent = 'Fout bij laden';
+  }
+}
+
+function updateHero(gegeten, doel, eiwit) {
+  const resterend = doel - gegeten;
+  const pct = Math.min((gegeten / doel) * 100, 100);
+  const heroNum = document.getElementById('heroNum');
+  const bar = document.getElementById('progressBar');
+  heroNum.textContent = Math.abs(resterend);
+  document.getElementById('statGegeten').textContent = gegeten + ' kcal';
+  document.getElementById('statEiwit').textContent = eiwit + 'g';
+  document.getElementById('heroDoel').textContent = `Dagdoel: ${doel} kcal`;
+  if (resterend < 0) {
+    document.getElementById('heroSub').textContent = 'kcal boven je doel';
+    heroNum.className = 'hero-num danger';
+    bar.className = 'progress-bar danger';
+  } else if (pct >= 80) {
+    document.getElementById('heroSub').textContent = 'kcal nog over';
+    heroNum.className = 'hero-num warn';
+    bar.className = 'progress-bar warn';
+  } else {
+    document.getElementById('heroSub').textContent = 'kcal nog over';
+    heroNum.className = 'hero-num ok';
+    bar.className = 'progress-bar';
+  }
+  bar.style.width = pct + '%';
+}
+
+async function opzoeken() {
+  const anthropicKey = localStorage.getItem('ct_anthropic_key') || '';
+  const eten = document.getElementById('eten').value.trim();
+  if (!eten) { setStatus('Vul eerst in wat je hebt gegeten.', 'err'); return; }
+  if (!anthropicKey) { setStatus('Vul je Anthropic API key in bij Instellingen (tab Overzicht).', 'err'); return; }
+  setStatus('Calorieën opzoeken...', 'loading');
+  document.getElementById('btnOpzoeken').disabled = true;
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': anthropicKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 200, messages: [{ role: 'user', content: `Bereken totale calorieën en eiwitten voor: "${eten}". Geef ALLEEN JSON: {"kcal": 450, "eiwitten": 22, "toelichting": "uitleg Nederlands"}` }] })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+    const parsed = JSON.parse(data.content.map(b => b.text||'').join('').replace(/```json|```/g,'').trim());
+    document.getElementById('kcal').value = parsed.kcal;
+    document.getElementById('eiwitten').value = parsed.eiwitten;
+    const tDiv = document.getElementById('toelichting');
+    tDiv.textContent = parsed.toelichting || '';
+    tDiv.className = 'toelichting show';
+    setStatus('✓ Gevonden! Controleer en voer in.', 'ok');
+  } catch(e) { setStatus('Fout: ' + e.message, 'err'); }
+  document.getElementById('btnOpzoeken').disabled = false;
+}
+
+async function invoeren() {
+  const googleKey = localStorage.getItem('ct_google_key') || '';
+  const sheetId = localStorage.getItem('ct_sheetid') || document.getElementById('sheetId').value.trim();
+  const datum = document.getElementById('datum').value;
+  const etenRaw = document.getElementById('eten').value.trim();
+  const kcal = document.getElementById('kcal').value;
+  const eiwitten = document.getElementById('eiwitten').value;
+  if (!googleKey) { setStatus('Vul je Google API key in bij Instellingen.', 'err'); return; }
+  if (!etenRaw) { setStatus('Vul in wat je hebt gegeten.', 'err'); return; }
+  if (!kcal) { setStatus('Vul de calorieën in of gebruik automatisch opzoeken.', 'err'); return; }
+  const etenFormatted = formatAsBullets(etenRaw);
+  setStatus('Verbinden met sheet...', 'loading');
+  document.getElementById('btnInvoeren').disabled = true;
+  try {
+    const rows = (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${SHEET_NAME}?key=${googleKey}`)).json()).values || [];
+    const zoekDatum = dutchDate(datum);
+    let targetRow = -1;
+    for (let i = 0; i < rows.length; i++) {
+      const cel = (rows[i][1]||'').toLowerCase().trim();
+      if (!cel) continue;
+      const parts = zoekDatum.toLowerCase().split(' ');
+      if (cel.includes(parts[0]) && cel.includes(parts[1])) {
+        for (let j = i; j < Math.min(i+10,rows.length); j++) {
+          if ((rows[j][3]||'').trim().toLowerCase() === selectedMaaltijd.toLowerCase()) { targetRow = j+1; break; }
+        }
+        break;
+      }
+    }
+    if (targetRow === -1) {
+      const parts = zoekDatum.toLowerCase().split(' ');
+      for (let i = 0; i < rows.length; i++) {
+        const cel = (rows[i][1]||'').toLowerCase().trim();
+        if (cel && parts.some(p => p.length > 3 && cel.includes(p))) {
+          for (let j = i; j < Math.min(i+10,rows.length); j++) {
+            if ((rows[j][3]||'').trim().toLowerCase() === selectedMaaltijd.toLowerCase()) { targetRow = j+1; break; }
+          }
+          if (targetRow !== -1) break;
+        }
+      }
+    }
+    if (targetRow === -1) throw new Error('Datum of maaltijd niet gevonden in sheet.');
+    const range = `${SHEET_NAME}!E${targetRow}:G${targetRow}`;
+    const writeResp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED&key=${googleKey}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [[etenFormatted, Number(eiwitten), Number(kcal)]] })
+    });
+    if (!writeResp.ok) {
+      const err = await writeResp.json();
+      if (err.error?.status === 'PERMISSION_DENIED') throw new Error('Geen schrijftoegang. Controleer je Google API key (geen restricties).');
+      throw new Error(err.error?.message || 'Schrijffout');
+    }
+    setStatus(`✓ ${selectedMaaltijd} ingevoerd!`, 'ok');
+    document.getElementById('eten').value = '';
+    document.getElementById('kcal').value = '';
+    document.getElementById('eiwitten').value = '';
+    document.getElementById('toelichting').className = 'toelichting';
+    setTimeout(() => laadDag(), 800);
+  } catch(e) { setStatus('Fout: ' + e.message, 'err'); }
+  document.getElementById('btnInvoeren').disabled = false;
+}
+
+init();
+</script>
+</body>
+</html>
