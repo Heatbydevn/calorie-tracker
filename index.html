@@ -11,51 +11,32 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: -apple-system, 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; background: #0a0a1a; color: #fff; }
-
-.bg-gradient {
-  position: fixed; inset: 0; z-index: 0;
-  background: radial-gradient(ellipse at 20% 20%, rgba(120,80,255,0.35) 0%, transparent 50%),
-              radial-gradient(ellipse at 80% 10%, rgba(0,180,255,0.25) 0%, transparent 45%),
-              radial-gradient(ellipse at 60% 80%, rgba(255,80,180,0.2) 0%, transparent 50%),
-              radial-gradient(ellipse at 10% 70%, rgba(0,255,180,0.15) 0%, transparent 40%),
-              #0a0a1a;
-  animation: bgShift 12s ease-in-out infinite alternate;
-}
+.bg-gradient { position: fixed; inset: 0; z-index: 0; background: radial-gradient(ellipse at 20% 20%, rgba(120,80,255,0.35) 0%, transparent 50%), radial-gradient(ellipse at 80% 10%, rgba(0,180,255,0.25) 0%, transparent 45%), radial-gradient(ellipse at 60% 80%, rgba(255,80,180,0.2) 0%, transparent 50%), radial-gradient(ellipse at 10% 70%, rgba(0,255,180,0.15) 0%, transparent 40%), #0a0a1a; animation: bgShift 12s ease-in-out infinite alternate; }
 @keyframes bgShift { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(20deg) brightness(1.1); } }
-
 .glass { background: rgba(255,255,255,0.08); backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%); border: 1px solid rgba(255,255,255,0.18); border-bottom-color: rgba(255,255,255,0.06); border-right-color: rgba(255,255,255,0.06); box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 8px 32px rgba(0,0,0,0.3); }
-.glass-dark { background: rgba(0,0,0,0.25); backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%); border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
-
-/* Header */
 .header { padding: 54px 20px 0; position: sticky; top: 0; z-index: 100; background: rgba(10,10,26,0.7); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border-bottom: 1px solid rgba(255,255,255,0.08); }
 .header-top { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; }
 .app-title { font-size: 24px; font-weight: 700; letter-spacing: -0.8px; background: linear-gradient(135deg, #fff 0%, rgba(200,160,255,0.9) 50%, rgba(100,200,255,0.8) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.header-right { display: flex; align-items: center; gap: 8px; }
 .sheet-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; color: rgba(200,160,255,1); cursor: pointer; text-decoration: none; }
 .date-nav { display: flex; align-items: center; gap: 4px; }
 .date-nav-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 50%; width: 26px; height: 26px; color: rgba(255,255,255,0.6); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .date-label { font-size: 11px; color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; white-space: nowrap; min-width: 72px; text-align: center; }
-
-/* Bottom dock */
 .dock-wrap { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; padding: 0 20px calc(env(safe-area-inset-bottom) + 12px); }
 .dock { background: rgba(255,255,255,0.1); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border: 1px solid rgba(255,255,255,0.2); border-radius: 28px; display: grid; grid-template-columns: repeat(4, 1fr); padding: 8px; gap: 4px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 8px 32px rgba(0,0,0,0.4); }
 .dock-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; border-radius: 18px; border: none; background: transparent; color: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.2s; }
 .dock-btn.active { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.95); box-shadow: inset 0 1px 0 rgba(255,255,255,0.2); }
 .dock-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.dock-btn span { font-size: 10px; font-weight: 600; letter-spacing: 0.02em; }
-
-/* Pages */
+.dock-btn span { font-size: 10px; font-weight: 600; }
 .pages-wrap { position: relative; z-index: 1; overflow: hidden; }
 .pages-slider { display: flex; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); will-change: transform; }
 .page { min-width: 100vw; padding: 16px 16px calc(env(safe-area-inset-bottom) + 100px); display: flex; flex-direction: column; gap: 14px; }
-
-/* Cards */
 .card { border-radius: 22px; padding: 18px; }
 .card-title { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.4); margin-bottom: 14px; letter-spacing: 0.08em; text-transform: uppercase; }
 
 /* HERO */
 .hero-card { border-radius: 26px; padding: 24px 20px 20px; text-align: center; position: relative; overflow: hidden; }
 .hero-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(120,80,255,0.12), rgba(0,180,255,0.08)); pointer-events: none; }
+.hero-greeting { font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 4px; font-weight: 400; }
 .hero-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 8px; }
 .hero-num { font-size: 72px; font-weight: 700; letter-spacing: -4px; line-height: 1; margin-bottom: 4px; }
 .hero-num.ok { background: linear-gradient(135deg, #50dc8c, #00c6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -72,18 +53,21 @@ body { font-family: -apple-system, 'DM Sans', sans-serif; min-height: 100vh; ove
 .stat-num { font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.85); letter-spacing: -0.5px; }
 .stat-label { font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
 
-/* Gewicht */
-.gewicht-card { margin-top: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px; }
-.gewicht-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; text-align: center; }
-.gewicht-label { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+/* Gewicht progressie */
+.gewicht-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 16px; }
+.gewicht-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; text-align: center; }
+.gewicht-lbl { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
 .gewicht-val { font-size: 20px; font-weight: 700; color: rgba(255,255,255,0.9); }
-.gewicht-start { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.5); }
-.gewicht-diff { font-size: 16px; font-weight: 700; color: #50dc8c; }
-.gewicht-diff.gain { color: #ff7070; }
-.gewicht-progress-wrap { height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; margin-bottom: 12px; }
-.gewicht-progress-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #ff7070, #50dc8c); transition: width 0.6s ease; }
-.gewicht-edit { display: flex; gap: 8px; }
-.gewicht-input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #fff; font-size: 14px; padding: 9px 12px; outline: none; }
+.gewicht-start-val { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.5); }
+.gewicht-diff-val { font-size: 16px; font-weight: 700; color: #50dc8c; }
+.gewicht-diff-val.gain { color: #ff7070; }
+.doel-progress-wrap { margin-bottom: 8px; }
+.doel-progress-label { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.35); margin-bottom: 6px; }
+.doel-progress-bar-wrap { height: 8px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; }
+.doel-progress-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #ff7070, #ffb432, #50dc8c); transition: width 0.8s ease; }
+.doel-motivatie { font-size: 12px; color: rgba(100,200,255,0.8); text-align: center; margin-top: 8px; font-weight: 500; }
+.gewicht-edit { display: flex; gap: 8px; margin-top: 12px; }
+.gewicht-input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #fff; font-size: 14px; padding: 9px 12px; outline: none; font-family: -apple-system, 'DM Sans', sans-serif; }
 .gewicht-btn { background: linear-gradient(135deg, rgba(140,90,255,0.8), rgba(80,160,255,0.8)); border: none; border-radius: 10px; color: #fff; font-size: 13px; font-weight: 600; padding: 9px 14px; cursor: pointer; }
 
 /* Suggesties */
@@ -96,10 +80,10 @@ body { font-family: -apple-system, 'DM Sans', sans-serif; min-height: 100vh; ove
 .suggestie-desc { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.4; }
 .suggestie-maaltijd { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(100,200,255,0.7); margin-bottom: 3px; }
 
-/* Detail modal */
+/* Modal */
 .modal-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 .modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal { background: rgba(20,15,40,0.95); border: 1px solid rgba(255,255,255,0.15); border-radius: 28px 28px 0 0; padding: 24px 20px calc(env(safe-area-inset-bottom) + 24px); width: 100%; max-height: 80vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+.modal { background: rgba(20,15,40,0.97); border: 1px solid rgba(255,255,255,0.15); border-radius: 28px 28px 0 0; padding: 24px 20px calc(env(safe-area-inset-bottom) + 24px); width: 100%; max-height: 80vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
 .modal-overlay.open .modal { transform: translateY(0); }
 .modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 99px; margin: 0 auto 20px; }
 .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
@@ -110,7 +94,7 @@ body { font-family: -apple-system, 'DM Sans', sans-serif; min-height: 100vh; ove
 .modal-loading { font-size: 13px; color: rgba(255,255,255,0.35); text-align: center; padding: 20px; }
 .modal-close { width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 14px; color: rgba(255,255,255,0.7); font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; }
 
-/* Maaltijdlijst */
+/* Maaltijden */
 .maaltijd-lijst { display: flex; flex-direction: column; gap: 6px; }
 .maaltijd-rij { display: flex; align-items: flex-start; justify-content: space-between; padding: 12px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; gap: 10px; }
 .maaltijd-left { flex: 1; min-width: 0; }
@@ -129,20 +113,16 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
 .field { margin-bottom: 12px; }
 .num-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
 .num-row input { text-align: center; font-size: 20px; font-weight: 600; }
-
 .seg-control { display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(0,0,0,0.2); border-radius: 12px; padding: 3px; gap: 2px; border: 1px solid rgba(255,255,255,0.08); }
-.seg-btn { padding: 8px 4px; border-radius: 9px; border: none; background: transparent; color: rgba(255,255,255,0.4); font-family: -apple-system, 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-align: center; }
+.seg-btn { padding: 8px 4px; border-radius: 9px; border: none; background: transparent; color: rgba(255,255,255,0.4); font-family: -apple-system, 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; text-align: center; }
 .seg-btn.active { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.95); }
-
-.btn-primary { width: 100%; background: linear-gradient(135deg, rgba(140,90,255,0.9), rgba(80,160,255,0.9)); border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 15px; color: #fff; font-family: -apple-system, 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: inset 0 1px 0 rgba(255,255,255,0.25); }
+.btn-primary { width: 100%; background: linear-gradient(135deg, rgba(140,90,255,0.9), rgba(80,160,255,0.9)); border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 15px; color: #fff; font-family: -apple-system, 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.25); }
 .btn-primary:active { transform: scale(0.97); }
 .btn-primary:disabled { opacity: 0.35; }
 .btn-secondary { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); border-radius: 14px; padding: 14px; color: rgba(255,255,255,0.8); font-family: -apple-system, 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; }
-.btn-secondary:active { background: rgba(255,255,255,0.12); }
 .btn-secondary:disabled { opacity: 0.35; }
 .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
 .wis-btn { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; width: 28px; height: 28px; color: rgba(255,255,255,0.4); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
 .status { border-radius: 12px; padding: 12px 14px; font-size: 13px; font-weight: 500; display: none; line-height: 1.4; margin-top: 12px; }
 .status.ok { background: rgba(80,220,140,0.12); color: #50dc8c; display: block; border: 1px solid rgba(80,220,140,0.2); }
 .status.err { background: rgba(255,80,80,0.1); color: #ff7070; display: block; border: 1px solid rgba(255,80,80,0.2); }
@@ -151,31 +131,28 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
 .toelichting.show { display: block; }
 
 /* Settings */
-.settings-section { display: flex; flex-direction: column; gap: 14px; }
-.settings-group { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 18px; overflow: hidden; }
-.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.settings-group { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 18px; overflow: hidden; margin-bottom: 14px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); gap: 12px; }
 .settings-row:last-child { border-bottom: none; }
 .settings-row-label { font-size: 14px; color: rgba(255,255,255,0.8); font-weight: 500; }
 .settings-row-sub { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 2px; }
-.settings-input { background: transparent; border: none; color: rgba(255,255,255,0.6); font-size: 13px; text-align: right; outline: none; width: 160px; font-family: -apple-system, 'DM Sans', sans-serif; }
+.settings-input { background: transparent; border: none; color: rgba(255,255,255,0.6); font-size: 13px; text-align: right; outline: none; width: 150px; font-family: -apple-system, 'DM Sans', sans-serif; }
 .settings-save { width: 100%; background: linear-gradient(135deg, rgba(140,90,255,0.9), rgba(80,160,255,0.9)); border: none; border-radius: 14px; padding: 15px; color: #fff; font-family: -apple-system, 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; }
 </style>
 </head>
 <body>
 <div class="bg-gradient"></div>
-
-<div style="position:relative; z-index:1;">
+<div style="position:relative;z-index:1;">
   <div class="header">
     <div class="header-top">
       <div class="app-title">Calorieën</div>
-      <div class="header-right">
-        <a class="sheet-btn" id="sheetLink" href="https://docs.google.com/spreadsheets/d/1VVEAaCSI2A1j_YSIcr1lWiIDmmACVgI_1DZK0o7tTqg/edit" target="_blank">↗ Sheet</a>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <a class="sheet-btn" id="sheetLink" href="#" target="_blank">↗ Sheet</a>
         <div class="date-nav">
           <button class="date-nav-btn" onclick="changeDate(-1)">‹</button>
           <div class="date-label" id="dateLabel">Vandaag</div>
           <button class="date-nav-btn" onclick="changeDate(1)">›</button>
         </div>
-        <input type="date" id="datum" style="display:none;" />
       </div>
     </div>
   </div>
@@ -186,6 +163,7 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
       <!-- TAB 0: Vandaag -->
       <div class="page">
         <div class="card glass hero-card">
+          <div class="hero-greeting" id="heroGreeting"></div>
           <div class="hero-label">Nog te eten vandaag</div>
           <div class="hero-num ok" id="heroNum">—</div>
           <div class="hero-sub" id="heroSub">kcal</div>
@@ -196,22 +174,33 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
             <div class="stat-item"><div class="stat-num" id="statEiwit">—</div><div class="stat-label">eiwit</div></div>
             <div class="stat-item"><div class="stat-num" id="statStreak">🔥 0</div><div class="stat-label">streak</div></div>
           </div>
-          <div class="gewicht-card" id="gewichtRow" style="display:none;">
-            <div class="gewicht-top">
-              <div><div class="gewicht-label">Huidig</div><div class="gewicht-val" id="gewichtVal">—</div></div>
-              <div><div class="gewicht-label">Start</div><div class="gewicht-start" id="gewichtStart">—</div></div>
-              <div><div class="gewicht-label">Verschil</div><div class="gewicht-diff" id="gewichtDiff">—</div></div>
+        </div>
+
+        <!-- Gewicht progressie -->
+        <div class="card glass gewicht-card" id="gewichtCard" style="display:none;">
+          <div class="card-title">⚖️ Gewicht</div>
+          <div class="gewicht-top">
+            <div><div class="gewicht-lbl">Huidig</div><div class="gewicht-val" id="gewichtHuidig">—</div></div>
+            <div><div class="gewicht-lbl">Start</div><div class="gewicht-start-val" id="gewichtStart">—</div></div>
+            <div><div class="gewicht-lbl">Verschil</div><div class="gewicht-diff-val" id="gewichtDiff">—</div></div>
+          </div>
+          <div class="doel-progress-wrap">
+            <div class="doel-progress-label">
+              <span id="gewichtDoelLabel">Richting doel</span>
+              <span id="gewichtDoelPct">0%</span>
             </div>
-            <div class="gewicht-progress-wrap"><div class="gewicht-progress-bar" id="gewichtBar" style="width:50%"></div></div>
-            <div class="gewicht-edit">
-              <input class="gewicht-input" type="text" id="gewichtInput" placeholder="Nieuw gewicht bijv. 82 kg" />
-              <button class="gewicht-btn" onclick="slaGewichtOp()">Opslaan</button>
-            </div>
+            <div class="doel-progress-bar-wrap"><div class="doel-progress-bar" id="gewichtDoelBar" style="width:0%"></div></div>
+          </div>
+          <div class="doel-motivatie" id="gewichtMotivatie"></div>
+          <div class="gewicht-edit">
+            <input class="gewicht-input" type="text" id="gewichtInput" placeholder="Nieuw gewicht bijv. 82 kg" />
+            <button class="gewicht-btn" onclick="slaGewichtOp()">Opslaan</button>
           </div>
         </div>
 
+        <!-- Suggesties -->
         <div class="card glass" id="suggestiesCard" style="display:none;">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
             <div class="card-title" style="margin-bottom:0;">💡 Wat kan ik nog eten?</div>
             <button class="dag-refresh" onclick="laadSuggesties(true)">↻</button>
           </div>
@@ -246,7 +235,7 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
           <div class="toelichting" id="toelichting"></div>
           <div class="btn-group">
             <button class="btn-secondary" id="btnOpzoeken" onclick="opzoeken()">🔍 Calorieën automatisch opzoeken</button>
-            <button class="btn-primary" id="btnInvoeren" onclick="invoeren()">↑ In sheet invoeren</button>
+            <button class="btn-primary" id="btnInvoeren" onclick="invoeren()">Maaltijd toevoegen</button>
           </div>
           <div class="status" id="status"></div>
         </div>
@@ -263,51 +252,50 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
         </div>
       </div>
 
-      <!-- TAB 3: Instellingen -->
+      <!-- TAB 3: Profiel & Instellingen -->
       <div class="page">
-        <div class="settings-section">
-          <div class="card-title" style="margin-bottom:0;">Instellingen</div>
-          <div class="settings-group">
-            <div class="settings-row">
-              <div><div class="settings-row-label">Anthropic API Key</div><div class="settings-row-sub">Voor calorieën opzoeken</div></div>
-              <input class="settings-input" type="password" id="anthropicKey" placeholder="sk-ant-..." autocomplete="off" />
-            </div>
-            <div class="settings-row">
-              <div><div class="settings-row-label">Google Sheets API Key</div><div class="settings-row-sub">Voor sheet uitlezen</div></div>
-              <input class="settings-input" type="password" id="googleKey" placeholder="AIzaSy..." autocomplete="off" />
-            </div>
-            <div class="settings-row">
-              <div><div class="settings-row-label">Spreadsheet ID</div></div>
-              <input class="settings-input" type="text" id="sheetId" value="1VVEAaCSI2A1j_YSIcr1lWiIDmmACVgI_1DZK0o7tTqg" autocomplete="off" />
-            </div>
+        <div class="card-title" style="margin-bottom:0;">Profiel</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div><div class="settings-row-label">Naam</div></div>
+            <input class="settings-input" type="text" id="profielNaam" placeholder="Jouw naam" />
           </div>
-          <button class="settings-save" onclick="saveSettings()">Opslaan</button>
-          <div class="status" id="settingsStatus"></div>
-
-          <div class="card-title" style="margin-bottom:0;margin-top:8px;">Sheet schrijftoegang (Apps Script)</div>
-          <div class="settings-group">
-            <div class="settings-row">
-              <div><div class="settings-row-label">Apps Script URL</div><div class="settings-row-sub">Nodig voor invoeren in sheet</div></div>
-              <input class="settings-input" type="text" id="appsScriptUrl" placeholder="https://script.google.com/..." autocomplete="off" />
-            </div>
+          <div class="settings-row">
+            <div><div class="settings-row-label">Leeftijd</div></div>
+            <input class="settings-input" type="number" id="profielLeeftijd" placeholder="bijv. 28" inputmode="numeric" />
           </div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.3); line-height:1.6; padding: 4px 2px;">
-            Stap 1: Open je Google Sheet → Extensies → Apps Script<br>
-            Stap 2: Vervang alle code door de code hieronder en klik Opslaan<br>
-            Stap 3: Klik Implementeren → Nieuwe implementatie → Web-app<br>
-            Stap 4: Uitvoeren als: Ikzelf — Toegang: Iedereen<br>
-            Stap 5: Kopieer de URL en plak die hierboven
+          <div class="settings-row">
+            <div><div class="settings-row-label">Lengte</div></div>
+            <input class="settings-input" type="text" id="profielLengte" placeholder="bijv. 185 cm" />
           </div>
-          <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;font-size:11px;color:rgba(255,255,255,0.5);font-family:monospace;line-height:1.6;word-break:break-all;">
-function doPost(e) {
-  const data = JSON.parse(e.postData.contents);
-  const sheet = SpreadsheetApp.openById(data.sheetId).getSheetByName(data.sheet);
-  const range = sheet.getRange(data.range);
-  range.setValues([data.values]);
-  return ContentService.createTextOutput('ok');
-}
+          <div class="settings-row">
+            <div><div class="settings-row-label">Gewichtsdoel</div></div>
+            <input class="settings-input" type="text" id="profielGewichtsDoel" placeholder="bijv. 90 kg" />
           </div>
         </div>
+
+        <div class="card-title" style="margin-bottom:0;">API Keys</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div><div class="settings-row-label">Anthropic API Key</div><div class="settings-row-sub">Voor calorieën opzoeken</div></div>
+            <input class="settings-input" type="password" id="anthropicKey" placeholder="sk-ant-..." autocomplete="off" />
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-row-label">Google Sheets API Key</div><div class="settings-row-sub">Voor sheet uitlezen</div></div>
+            <input class="settings-input" type="password" id="googleKey" placeholder="AIzaSy..." autocomplete="off" />
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-row-label">Apps Script URL</div><div class="settings-row-sub">Voor invoeren in sheet</div></div>
+            <input class="settings-input" type="text" id="appsScriptUrl" placeholder="https://script.google.com/..." autocomplete="off" />
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-row-label">Spreadsheet ID</div></div>
+            <input class="settings-input" type="text" id="sheetId" value="1VVEAaCSI2A1j_YSIcr1lWiIDmmACVgI_1DZK0o7tTqg" autocomplete="off" />
+          </div>
+        </div>
+
+        <button class="settings-save" onclick="saveSettings()">Opslaan</button>
+        <div class="status" id="settingsStatus"></div>
       </div>
 
     </div>
@@ -322,7 +310,7 @@ function doPost(e) {
       <span>Vandaag</span>
     </button>
     <button class="dock-btn" id="dock1" onclick="goTab(1)">
-      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
       <span>Invoeren</span>
     </button>
     <button class="dock-btn" id="dock2" onclick="goTab(2)">
@@ -353,88 +341,105 @@ const MAALTIJDEN = ['Ontbijt','Lunch','Avondeten','Snack'];
 let selectedMaaltijd = 'Lunch';
 let currentTab = 0;
 let touchStartX = 0, touchStartY = 0;
+let _huidigeDagData = {};
 
-// ── DATUM FUNCTIES (geen Date object) ──────────────────
+// ── DATUM: puur wiskundig, geen new Date() voor conversies ──
 function getLocalIso() {
   const n = new Date();
   return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
 }
 
 function zellerDag(y, m, d) {
-  // Zeller's congruence - geen Date object, altijd correct
-  let cy = y, cm = m;
+  let cy=y, cm=m;
   if (cm < 3) { cm += 12; cy--; }
   const k = cy % 100, j = Math.floor(cy / 100);
   const h = (d + Math.floor(13*(cm+1)/5) + k + Math.floor(k/4) + Math.floor(j/4) - 2*j) % 7;
-  return [6,0,1,2,3,4,5][((h % 7) + 7) % 7]; // 0=zo..6=za
+  return [6,0,1,2,3,4,5][((h%7)+7)%7];
+}
+
+function isoToDutchLabel(iso) {
+  const [y,m,d] = iso.split('-').map(Number);
+  const dag = DAYS_NL[zellerDag(y,m,d)];
+  return dag.charAt(0).toUpperCase()+dag.slice(1)+' '+d+' '+MONTHS_NL[m-1];
+}
+
+// BELANGRIJK: zoekstring bevat dagnaam om te voorkomen dat "2" matcht op "12" of "22"
+function isoToZoekString(iso) {
+  const [y,m,d] = iso.split('-').map(Number);
+  const dag = DAYS_NL[zellerDag(y,m,d)];
+  return dag + ' ' + d + ' ' + MONTHS_NL[m-1]; // bijv "zaterdag 30 mei"
 }
 
 function updateDatumLabel(iso) {
   const isToday = iso === getLocalIso();
-  if (isToday) { document.getElementById('dateLabel').textContent = 'Vandaag'; return; }
-  const [y, m, d] = iso.split('-').map(Number);
-  const dag = DAYS_NL[zellerDag(y, m, d)];
-  document.getElementById('dateLabel').textContent = dag.charAt(0).toUpperCase() + dag.slice(1) + ' ' + d + ' ' + MONTHS_NL[m-1];
+  document.getElementById('dateLabel').textContent = isToday ? 'Vandaag' : isoToDutchLabel(iso);
 }
 
 function changeDate(delta) {
   const iso = document.getElementById('datum').value;
-  let [y, m, d] = iso.split('-').map(Number);
+  let [y,m,d] = iso.split('-').map(Number);
   d += delta;
-  const dim = (mo, yr) => new Date(yr, mo, 0).getDate();
-  if (d < 1) { m--; if (m < 1) { m = 12; y--; } d = dim(m, y); }
-  if (d > dim(m, y)) { d = 1; m++; if (m > 12) { m = 1; y++; } }
-  const newIso = y + '-' + String(m).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+  const dim = (mo,yr) => new Date(yr,mo,0).getDate();
+  if (d < 1) { m--; if(m<1){m=12;y--;} d=dim(m,y); }
+  if (d > dim(m,y)) { d=1; m++; if(m>12){m=1;y++;} }
+  const newIso = y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
   document.getElementById('datum').value = newIso;
   updateDatumLabel(newIso);
   laadDag();
 }
 
-// ── SWIPE ──────────────────────────────────────────────
-document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; }, { passive: true });
+// ── SWIPE ──
+document.addEventListener('touchstart', e => { touchStartX=e.touches[0].clientX; touchStartY=e.touches[0].clientY; }, {passive:true});
 document.addEventListener('touchend', e => {
   const dx = e.changedTouches[0].clientX - touchStartX;
   const dy = e.changedTouches[0].clientY - touchStartY;
   if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
-    if (dx < 0 && currentTab < 3) goTab(currentTab + 1);
-    if (dx > 0 && currentTab > 0) goTab(currentTab - 1);
+    if (dx < 0 && currentTab < 3) goTab(currentTab+1);
+    if (dx > 0 && currentTab > 0) goTab(currentTab-1);
   }
-}, { passive: true });
+}, {passive:true});
 
 function goTab(n) {
   currentTab = n;
-  document.getElementById('pagesSlider').style.transform = `translateX(-${n * 100}vw)`;
-  document.querySelectorAll('.dock-btn').forEach((b, i) => b.classList.toggle('active', i === n));
+  document.getElementById('pagesSlider').style.transform = `translateX(-${n*100}vw)`;
+  document.querySelectorAll('.dock-btn').forEach((b,i) => b.classList.toggle('active', i===n));
 }
 
-// ── INIT ───────────────────────────────────────────────
+// ── INIT ──
 function init() {
   const iso = getLocalIso();
   document.getElementById('datum').value = iso;
   updateDatumLabel(iso);
-  const ak = localStorage.getItem('ct_anthropic_key');
-  const gk = localStorage.getItem('ct_google_key');
-  const sid = localStorage.getItem('ct_sheetid');
-  const su = localStorage.getItem('ct_script_url');
-  if (ak) document.getElementById('anthropicKey').value = ak;
-  if (gk) document.getElementById('googleKey').value = gk;
-  if (sid) { document.getElementById('sheetId').value = sid; document.getElementById('sheetLink').href = `https://docs.google.com/spreadsheets/d/${sid}/edit`; }
-  if (su) document.getElementById('appsScriptUrl').value = su;
+
+  const fields = ['anthropicKey','googleKey','sheetId','appsScriptUrl','profielNaam','profielLeeftijd','profielLengte','profielGewichtsDoel'];
+  fields.forEach(f => { const v = localStorage.getItem('ct_'+f); if(v) document.getElementById(f).value = v; });
+
+  const sid = localStorage.getItem('ct_sheetId') || '1VVEAaCSI2A1j_YSIcr1lWiIDmmACVgI_1DZK0o7tTqg';
+  document.getElementById('sheetLink').href = `https://docs.google.com/spreadsheets/d/${sid}/edit`;
+
+  // Naam greeting
+  const naam = localStorage.getItem('ct_profielNaam');
+  if (naam) document.getElementById('heroGreeting').textContent = `Hi ${naam} 👋`;
+
   updateStreak();
+  const gk = localStorage.getItem('ct_googleKey');
   if (gk) laadDag();
 }
 
-// ── SETTINGS ───────────────────────────────────────────
+// ── SETTINGS ──
 function saveSettings() {
+  const fields = ['anthropicKey','googleKey','sheetId','appsScriptUrl','profielNaam','profielLeeftijd','profielLengte','profielGewichtsDoel'];
+  fields.forEach(f => localStorage.setItem('ct_'+f, document.getElementById(f).value.trim()));
   const sid = document.getElementById('sheetId').value.trim();
-  localStorage.setItem('ct_anthropic_key', document.getElementById('anthropicKey').value.trim());
-  localStorage.setItem('ct_google_key', document.getElementById('googleKey').value.trim());
-  localStorage.setItem('ct_sheetid', sid);
-  localStorage.setItem('ct_script_url', document.getElementById('appsScriptUrl').value.trim());
   document.getElementById('sheetLink').href = `https://docs.google.com/spreadsheets/d/${sid}/edit`;
+
+  // Update greeting
+  const naam = document.getElementById('profielNaam').value.trim();
+  document.getElementById('heroGreeting').textContent = naam ? `Hi ${naam} 👋` : '';
+
   const el = document.getElementById('settingsStatus');
   el.textContent = '✓ Opgeslagen!'; el.className = 'status ok';
-  setTimeout(() => { el.className = 'status'; laadDag(); }, 1000);
+  setTimeout(() => { el.className='status'; laadDag(); }, 1000);
 }
 
 function setMaaltijd(val, btn) {
@@ -443,314 +448,328 @@ function setMaaltijd(val, btn) {
   btn.classList.add('active');
 }
 
-function setStatus(msg, type) { const el = document.getElementById('status'); el.textContent = msg; el.className = 'status ' + type; }
+function setStatus(msg, type) { const el=document.getElementById('status'); el.textContent=msg; el.className='status '+type; }
 
 function wisInvoer() {
-  document.getElementById('eten').value = '';
-  document.getElementById('kcal').value = '';
-  document.getElementById('eiwitten').value = '';
-  document.getElementById('toelichting').className = 'toelichting';
-  document.getElementById('status').className = 'status';
+  ['eten','kcal','eiwitten'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('toelichting').className='toelichting';
+  document.getElementById('status').className='status';
 }
 
 function safeJSON(text) {
   return JSON.parse(text.replace(/```json|```/g,'').replace(/[\u0000-\u001F\u007F]/g,' ').trim());
 }
 
-function dutchDate(iso) {
-  const [y, m, d] = iso.split('-').map(Number);
-  return d + ' ' + MONTHS_NL[m-1];
-}
-
-// ── STREAK ─────────────────────────────────────────────
+// ── STREAK ──
 function updateStreak() {
   const today = getLocalIso();
-  let streak = parseInt(localStorage.getItem('ct_streak') || '0');
+  let streak = parseInt(localStorage.getItem('ct_streak')||'0');
   const last = localStorage.getItem('ct_streak_last');
   const [y,m,d] = today.split('-').map(Number);
-  let yd = d-1, ym = m, yy = y;
-  if (yd < 1) { ym--; if(ym<1){ym=12;yy--;} yd=new Date(yy,ym,0).getDate(); }
+  let yd=d-1,ym=m,yy=y;
+  if(yd<1){ym--;if(ym<1){ym=12;yy--;}yd=new Date(yy,ym,0).getDate();}
   const yesterday = yy+'-'+String(ym).padStart(2,'0')+'-'+String(yd).padStart(2,'0');
-  if (last !== today && last !== yesterday) streak = 0;
-  document.getElementById('statStreak').textContent = '🔥 ' + streak;
+  if(last!==today&&last!==yesterday) streak=0;
+  document.getElementById('statStreak').textContent='🔥 '+streak;
 }
 
 function bumpStreak() {
   const today = getLocalIso();
-  if (localStorage.getItem('ct_streak_last') === today) return;
+  if(localStorage.getItem('ct_streak_last')===today) return;
   const last = localStorage.getItem('ct_streak_last');
-  const [y,m,d] = today.split('-').map(Number);
-  let yd = d-1, ym = m, yy = y;
-  if (yd < 1) { ym--; if(ym<1){ym=12;yy--;} yd=new Date(yy,ym,0).getDate(); }
-  const yesterday = yy+'-'+String(ym).padStart(2,'0')+'-'+String(yd).padStart(2,'0');
-  let streak = parseInt(localStorage.getItem('ct_streak') || '0');
-  streak = last === yesterday ? streak + 1 : 1;
-  localStorage.setItem('ct_streak', streak);
-  localStorage.setItem('ct_streak_last', today);
-  document.getElementById('statStreak').textContent = '🔥 ' + streak;
+  const [y,m,d]=today.split('-').map(Number);
+  let yd=d-1,ym=m,yy=y;
+  if(yd<1){ym--;if(ym<1){ym=12;yy--;}yd=new Date(yy,ym,0).getDate();}
+  const yesterday=yy+'-'+String(ym).padStart(2,'0')+'-'+String(yd).padStart(2,'0');
+  let streak=parseInt(localStorage.getItem('ct_streak')||'0');
+  streak=last===yesterday?streak+1:1;
+  localStorage.setItem('ct_streak',streak);
+  localStorage.setItem('ct_streak_last',today);
+  document.getElementById('statStreak').textContent='🔥 '+streak;
 }
 
-// ── GEWICHT ────────────────────────────────────────────
+// ── GEWICHT ──
+function updateGewichtCard(huidig, startGewicht) {
+  const doelStr = localStorage.getItem('ct_profielGewichtsDoel')||'';
+  const doelNum = parseFloat(doelStr.replace(',','.'));
+  const huidigNum = parseFloat(huidig.replace(',','.'));
+  const startNum = startGewicht;
+
+  document.getElementById('gewichtHuidig').textContent = huidig;
+  document.getElementById('gewichtStart').textContent = startNum.toString().replace('.',',')+' kg';
+
+  const diff = huidigNum - startNum;
+  const de = document.getElementById('gewichtDiff');
+  de.textContent = (diff<=0?'':'+')+diff.toFixed(1).replace('.',',')+' kg';
+  de.className = 'gewicht-diff-val'+(diff>0?' gain':'');
+
+  if (!isNaN(doelNum)) {
+    const totaalTeVerliezen = startNum - doelNum;
+    const alVerloren = startNum - huidigNum;
+    const pct = totaalTeVerliezen > 0 ? Math.min(Math.max((alVerloren/totaalTeVerliezen)*100, 0), 100) : 0;
+    const nogOver = Math.max(huidigNum - doelNum, 0).toFixed(1).replace('.',',');
+
+    document.getElementById('gewichtDoelLabel').textContent = `Doel: ${doelStr}`;
+    document.getElementById('gewichtDoelPct').textContent = Math.round(pct)+'%';
+    document.getElementById('gewichtDoelBar').style.width = pct+'%';
+
+    if (huidigNum <= doelNum) {
+      document.getElementById('gewichtMotivatie').textContent = '🎉 Doel bereikt!';
+    } else {
+      document.getElementById('gewichtMotivatie').textContent = `Nog ${nogOver} kg tot je doel — je bent er bijna!`;
+    }
+  }
+
+  document.getElementById('gewichtCard').style.display = 'block';
+}
+
 function slaGewichtOp() {
   const val = document.getElementById('gewichtInput').value.trim();
   if (!val) return;
-  document.getElementById('gewichtVal').textContent = val.includes('kg') ? val : val + ' kg';
+  const gewicht = val.includes('kg') ? val : val+' kg';
+  document.getElementById('gewichtHuidig').textContent = gewicht;
   document.getElementById('gewichtInput').value = '';
+  // TODO: schrijf naar sheet via Apps Script
 }
 
-// ── SHEET LADEN ────────────────────────────────────────
+// ── SHEET LADEN ──
 async function laadDag() {
-  const gk = localStorage.getItem('ct_google_key') || '';
-  const sid = localStorage.getItem('ct_sheetid') || document.getElementById('sheetId').value.trim();
+  const gk = localStorage.getItem('ct_googleKey')||'';
+  const sid = localStorage.getItem('ct_sheetId')||document.getElementById('sheetId').value.trim();
   const datum = document.getElementById('datum').value;
   const dagContent = document.getElementById('dagContent');
-  if (!gk || !sid) { dagContent.innerHTML = '<div class="dag-loading">Vul je API keys in bij Instellingen</div>'; document.getElementById('heroDoel').textContent = 'Vul API keys in'; return; }
-  dagContent.innerHTML = '<div class="dag-loading">Laden...</div>';
+
+  if (!gk||!sid) { dagContent.innerHTML='<div class="dag-loading">Vul je API keys in bij Instellingen</div>'; document.getElementById('heroDoel').textContent='Vul API keys in'; return; }
+  dagContent.innerHTML='<div class="dag-loading">Laden...</div>';
+
   try {
     const resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${SHEET_NAME}?key=${gk}`);
     if (!resp.ok) throw new Error('Sheet niet bereikbaar. Controleer je Google API key.');
-    const rows = (await resp.json()).values || [];
-    const doel = parseInt((rows[1]&&rows[1][1]) ? rows[1][1] : '2300') || 2300;
-    const zoek = dutchDate(datum);
-    let dagData = {}, gevonden = false, gewicht = null, startGewicht = null;
+    const rows = (await resp.json()).values||[];
+    const doel = parseInt((rows[1]&&rows[1][1])?rows[1][1]:'2300')||2300;
 
-    // Zoek startgewicht (eerste gewicht in sheet)
-    for (let i = 0; i < rows.length; i++) {
-      if (rows[i][2] && rows[i][2].toString().trim()) {
+    // Zoek startgewicht (eerste rij met gewicht in kolom C = index 2)
+    let startGewicht = null;
+    for (let i=0; i<rows.length; i++) {
+      if (rows[i][2]&&rows[i][2].toString().trim()) {
         const v = parseFloat(rows[i][2].toString().replace(',','.'));
-        if (!isNaN(v)) { startGewicht = v; break; }
+        if (!isNaN(v)) { startGewicht=v; break; }
       }
     }
 
-    for (let i = 0; i < rows.length; i++) {
+    // Zoek dag met dagnaam+dag+maand (voorkomt partial matches zoals "2" in "12")
+    const zoek = isoToZoekString(datum); // bijv "zaterdag 30 mei"
+    let dagData={}, gevonden=false, gewicht=null;
+
+    for (let i=0; i<rows.length; i++) {
       const cel = (rows[i][1]||'').toLowerCase().trim();
       if (!cel) continue;
-      const parts = zoek.toLowerCase().split(' ');
-      if (cel.includes(parts[0]) && cel.includes(parts[1])) {
-        gevonden = true;
-        if (rows[i][2]) gewicht = rows[i][2];
-        for (let j = i; j < Math.min(i+10,rows.length); j++) {
-          const mt = (rows[j][3]||'').trim();
-          if (MAALTIJDEN.includes(mt)) dagData[mt] = { eten: rows[j][4]||'', kcal: parseInt(rows[j][6])||0, eiwitten: parseInt(rows[j][5])||0 };
+      // Vergelijk de volledige zoekstring
+      if (cel === zoek.toLowerCase()) {
+        gevonden=true;
+        if (rows[i][2]) gewicht=rows[i][2];
+        for (let j=i; j<Math.min(i+10,rows.length); j++) {
+          const mt=(rows[j][3]||'').trim();
+          if (MAALTIJDEN.includes(mt)) dagData[mt]={eten:rows[j][4]||'',kcal:parseInt(rows[j][6])||0,eiwitten:parseInt(rows[j][5])||0};
         }
         break;
       }
     }
 
-    if (gewicht) {
-      const gn = parseFloat(gewicht.replace(',','.'));
-      const start = startGewicht || gn;
-      const diff = gn - start;
-      const pct = start === gn ? 50 : Math.min(Math.max(50 + (start-gn)/(start*0.1)*50, 0), 100);
-      document.getElementById('gewichtVal').textContent = gewicht;
-      document.getElementById('gewichtStart').textContent = start.toString().replace('.',',') + ' kg';
-      const de = document.getElementById('gewichtDiff');
-      de.textContent = (diff<=0?'':'+')+diff.toFixed(1).replace('.',',') + ' kg';
-      de.className = 'gewicht-diff' + (diff>0?' gain':'');
-      document.getElementById('gewichtBar').style.width = pct + '%';
-      document.getElementById('gewichtRow').style.display = 'block';
-    }
+    _huidigeDagData = dagData;
 
-    if (!gevonden) { dagContent.innerHTML = '<div class="dag-loading">Geen data voor deze datum</div>'; updateHero(0, doel, 0, dagData); return; }
+    if (gewicht&&startGewicht) updateGewichtCard(gewicht, startGewicht);
 
-    const totKcal = Object.values(dagData).reduce((s,m)=>s+m.kcal,0);
-    const totEiwit = Object.values(dagData).reduce((s,m)=>s+m.eiwitten,0);
-    updateHero(totKcal, doel, totEiwit, dagData);
+    if (!gevonden) { dagContent.innerHTML='<div class="dag-loading">Geen data voor deze datum</div>'; updateHero(0,doel,0); return; }
 
-    const html = MAALTIJDEN.map(mt => {
-      const info = dagData[mt];
-      if (info && info.kcal > 0) {
-        const lines = info.eten.split('\n').map(r=>r.trim()).filter(r=>r).map(r=>`<div>${r.startsWith('-')?r:'- '+r}</div>`).join('');
+    const totKcal=Object.values(dagData).reduce((s,m)=>s+m.kcal,0);
+    const totEiwit=Object.values(dagData).reduce((s,m)=>s+m.eiwitten,0);
+    updateHero(totKcal,doel,totEiwit);
+
+    const html=MAALTIJDEN.map(mt=>{
+      const info=dagData[mt];
+      if(info&&info.kcal>0){
+        const lines=info.eten.split('\n').map(r=>r.trim()).filter(r=>r).map(r=>`<div>${r.startsWith('-')?r:'- '+r}</div>`).join('');
         return `<div class="maaltijd-rij"><div class="maaltijd-left"><div class="maaltijd-naam">${mt}</div><div class="maaltijd-sub">${lines}</div></div><div class="maaltijd-kcal">${info.kcal} kcal</div></div>`;
       }
       return `<div class="maaltijd-rij"><div class="maaltijd-left"><div class="maaltijd-naam" style="color:rgba(255,255,255,0.25)">${mt}</div></div><div style="font-size:13px;color:rgba(255,255,255,0.2);">—</div></div>`;
     }).join('');
-    dagContent.innerHTML = `<div class="maaltijd-lijst">${html}</div>`;
+    dagContent.innerHTML=`<div class="maaltijd-lijst">${html}</div>`;
   } catch(e) {
-    dagContent.innerHTML = `<div class="dag-loading">Fout: ${e.message}</div>`;
+    dagContent.innerHTML=`<div class="dag-loading">Fout: ${e.message}</div>`;
   }
 }
 
-function updateHero(gegeten, doel, eiwit, dagData) {
-  const rest = doel - gegeten;
-  const pct = Math.min((gegeten/doel)*100, 100);
-  const hn = document.getElementById('heroNum');
-  const bar = document.getElementById('progressBar');
-  hn.textContent = Math.abs(rest);
-  document.getElementById('statGegeten').textContent = gegeten + ' kcal';
-  document.getElementById('statEiwit').textContent = eiwit + 'g';
-  document.getElementById('heroDoel').textContent = `Dagdoel: ${doel} kcal`;
-  if (rest < 0) { document.getElementById('heroSub').textContent = 'kcal boven je doel'; hn.className='hero-num danger'; bar.className='progress-bar danger'; }
-  else if (pct >= 80) { document.getElementById('heroSub').textContent = 'kcal nog over'; hn.className='hero-num warn'; bar.className='progress-bar warn'; }
-  else { document.getElementById('heroSub').textContent = 'kcal nog over'; hn.className='hero-num ok'; bar.className='progress-bar'; }
-  bar.style.width = pct + '%';
-  laadSuggesties(false, dagData);
+function updateHero(gegeten, doel, eiwit) {
+  const rest=doel-gegeten, pct=Math.min((gegeten/doel)*100,100);
+  const hn=document.getElementById('heroNum'), bar=document.getElementById('progressBar');
+  hn.textContent=Math.abs(rest);
+  document.getElementById('statGegeten').textContent=gegeten+' kcal';
+  document.getElementById('statEiwit').textContent=eiwit+'g';
+  document.getElementById('heroDoel').textContent=`Dagdoel: ${doel} kcal`;
+  if(rest<0){document.getElementById('heroSub').textContent='kcal boven je doel';hn.className='hero-num danger';bar.className='progress-bar danger';}
+  else if(pct>=80){document.getElementById('heroSub').textContent='kcal nog over';hn.className='hero-num warn';bar.className='progress-bar warn';}
+  else{document.getElementById('heroSub').textContent='kcal nog over';hn.className='hero-num ok';bar.className='progress-bar';}
+  bar.style.width=pct+'%';
+  laadSuggesties(false);
 }
 
-// ── SUGGESTIES ─────────────────────────────────────────
-async function laadSuggesties(force=false, dagData) {
-  const rest = parseInt(document.getElementById('heroNum').textContent)||0;
-  const overDoel = document.getElementById('heroSub').textContent.includes('boven');
-  if (overDoel || rest <= 50) { document.getElementById('suggestiesCard').style.display='none'; return; }
+// ── SUGGESTIES ──
+async function laadSuggesties(force=false) {
+  const rest=parseInt(document.getElementById('heroNum').textContent)||0;
+  const overDoel=document.getElementById('heroSub').textContent.includes('boven');
+  if(overDoel||rest<=50){document.getElementById('suggestiesCard').style.display='none';return;}
   document.getElementById('suggestiesCard').style.display='block';
 
-  const today = document.getElementById('datum').value;
-  const cacheKey = 'ct_sug_' + today;
-  if (!force && localStorage.getItem(cacheKey)) { document.getElementById('suggestiesContent').innerHTML = localStorage.getItem(cacheKey); return; }
+  const today=document.getElementById('datum').value;
+  const cacheKey='ct_sug_'+today;
+  if(!force&&localStorage.getItem(cacheKey)){document.getElementById('suggestiesContent').innerHTML=localStorage.getItem(cacheKey);return;}
 
-  const ak = localStorage.getItem('ct_anthropic_key')||'';
-  if (!ak) { document.getElementById('suggestiesContent').innerHTML='<div class="dag-loading">Vul Anthropic key in bij Instellingen</div>'; return; }
+  const ak=localStorage.getItem('ct_anthropicKey')||'';
+  if(!ak){document.getElementById('suggestiesContent').innerHTML='<div class="dag-loading">Vul Anthropic key in bij Instellingen</div>';return;}
   document.getElementById('suggestiesContent').innerHTML='<div class="dag-loading">Suggesties ophalen...</div>';
 
-  // Bepaal welke maaltijden al ingevuld zijn
-  const alIngevuld = dagData ? MAALTIJDEN.filter(m => dagData[m] && dagData[m].kcal > 0) : [];
-  const uur = new Date().getHours();
-  let nogTeKomen = uur < 10 ? ['Ontbijt','Lunch','Avondeten','Snack'] : uur < 13 ? ['Lunch','Avondeten','Snack'] : uur < 17 ? ['Avondeten','Snack'] : ['Avondeten','Snack'];
-  const beschikbaar = nogTeKomen.filter(m => !alIngevuld.includes(m));
-  const maaltijdenTxt = beschikbaar.length > 0 ? beschikbaar.join(', ') : nogTeKomen.join(', ');
+  const alIngevuld=MAALTIJDEN.filter(m=>_huidigeDagData[m]&&_huidigeDagData[m].kcal>0);
+  const uur=new Date().getHours();
+  let nogTeKomen=uur<10?['Ontbijt','Lunch','Avondeten','Snack']:uur<13?['Lunch','Avondeten','Snack']:['Avondeten','Snack'];
+  const beschikbaar=nogTeKomen.filter(m=>!alIngevuld.includes(m));
+  const maaltijdenTxt=beschikbaar.length>0?beschikbaar.join(', '):nogTeKomen.join(', ');
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:600,
-        messages:[{role:'user',content:`Het is ${uur}:00u. Ik heb nog ${rest} kcal over. Maaltijden die nog komen: ${maaltijdenTxt}. Geef 3-4 lekkere Nederlandse suggesties alleen voor deze momenten. Geen apostrofs in tekst. Alleen JSON: {"suggesties":[{"naam":"Naam","kcal":400,"maaltijd":"Avondeten","beschrijving":"Korte omschrijving"}]}`}]})
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,
+        messages:[{role:'user',content:`Het is ${uur}u. Ik heb nog ${rest} kcal over. Maaltijden die nog komen: ${maaltijdenTxt}. Geef 3-4 lekkere Nederlandse suggesties. Geen apostrofs. Alleen JSON: {"suggesties":[{"naam":"Naam","kcal":400,"maaltijd":"Avondeten","beschrijving":"Omschrijving"}]}`}]})
     });
-    const data = await resp.json();
-    if (data.error) throw new Error(data.error.message);
-    const parsed = safeJSON(data.content.map(b=>b.text||'').join(''));
-    const html = parsed.suggesties.map(s=>`
+    const data=await resp.json();
+    if(data.error) throw new Error(data.error.message);
+    const parsed=safeJSON(data.content.map(b=>b.text||'').join(''));
+    const html=parsed.suggesties.map(s=>`
       <div class="suggestie-item" onclick="openSuggestie('${s.naam.replace(/'/g,'')}',${s.kcal},'${s.beschrijving.replace(/'/g,'')}','${s.maaltijd}')">
         <div class="suggestie-maaltijd">${s.maaltijd}</div>
         <div class="suggestie-header"><div class="suggestie-naam">${s.naam}</div><div class="suggestie-kcal">${s.kcal} kcal</div></div>
-        <div class="suggestie-desc">${s.beschrijving} · <span style="color:rgba(160,120,255,0.7)">Tik voor details →</span></div>
+        <div class="suggestie-desc">${s.beschrijving} · <span style="color:rgba(160,120,255,0.7)">Details →</span></div>
       </div>`).join('');
-    document.getElementById('suggestiesContent').innerHTML = html;
-    localStorage.setItem(cacheKey, html);
-  } catch(e) { document.getElementById('suggestiesContent').innerHTML=`<div class="dag-loading">Fout: ${e.message}</div>`; }
+    document.getElementById('suggestiesContent').innerHTML=html;
+    localStorage.setItem(cacheKey,html);
+  } catch(e){document.getElementById('suggestiesContent').innerHTML=`<div class="dag-loading">Fout: ${e.message}</div>`;}
 }
 
-// ── DETAIL MODAL ───────────────────────────────────────
-async function openSuggestie(naam, kcal, beschrijving, maaltijd) {
+// ── DETAIL MODAL ──
+async function openSuggestie(naam,kcal,beschrijving,maaltijd) {
   document.getElementById('modalOverlay').classList.add('open');
-  document.getElementById('modalContent').innerHTML = '<div class="modal-loading">Details ophalen...</div>';
-  const ak = localStorage.getItem('ct_anthropic_key')||'';
-  if (!ak) { document.getElementById('modalContent').innerHTML=`<div class="modal-title">${naam}</div><div class="modal-kcal">${kcal} kcal · ${maaltijd}</div><div class="modal-text">${beschrijving}</div>`; return; }
+  document.getElementById('modalContent').innerHTML='<div class="modal-loading">Details ophalen...</div>';
+  const ak=localStorage.getItem('ct_anthropicKey')||'';
+  if(!ak){document.getElementById('modalContent').innerHTML=`<div class="modal-title">${naam}</div><div class="modal-kcal">${kcal} kcal · ${maaltijd}</div><div class="modal-text">${beschrijving}</div>`;return;}
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,
-        messages:[{role:'user',content:`Geef beknopte info over het gerecht "${naam}" (${kcal} kcal). Geen apostrofs. Alleen JSON: {"ingredienten":"komma-gescheiden lijst","bereiding":"korte bereiding in 2 zinnen","tip":"handig tip"}`}]})
+        messages:[{role:'user',content:`Geef info over gerecht "${naam}" (${kcal} kcal). Geen apostrofs. Alleen JSON: {"ingredienten":"lijst","bereiding":"2 zinnen","tip":"tip"}`}]})
     });
-    const data = await resp.json();
-    if (data.error) throw new Error(data.error.message);
-    const p = safeJSON(data.content.map(b=>b.text||'').join(''));
-    document.getElementById('modalContent').innerHTML = `
+    const data=await resp.json();
+    if(data.error) throw new Error(data.error.message);
+    const p=safeJSON(data.content.map(b=>b.text||'').join(''));
+    document.getElementById('modalContent').innerHTML=`
       <div class="modal-title">${naam}</div>
       <div class="modal-kcal">${kcal} kcal · ${maaltijd}</div>
       <div class="modal-section"><div class="modal-section-title">Ingrediënten</div><div class="modal-text">${p.ingredienten}</div></div>
       <div class="modal-section"><div class="modal-section-title">Bereiding</div><div class="modal-text">${p.bereiding}</div></div>
       <div class="modal-section"><div class="modal-section-title">💡 Tip</div><div class="modal-text">${p.tip}</div></div>`;
-  } catch(e) {
-    document.getElementById('modalContent').innerHTML=`<div class="modal-title">${naam}</div><div class="modal-kcal">${kcal} kcal · ${maaltijd}</div><div class="modal-text">${beschrijving}</div>`;
-  }
+  } catch(e){document.getElementById('modalContent').innerHTML=`<div class="modal-title">${naam}</div><div class="modal-kcal">${kcal} kcal · ${maaltijd}</div><div class="modal-text">${beschrijving}</div>`;}
 }
 
 function sluitModal(e) {
-  if (!e || e.target === document.getElementById('modalOverlay') || !e.target) {
-    document.getElementById('modalOverlay').classList.remove('open');
-  }
+  if(!e||e.target===document.getElementById('modalOverlay')) document.getElementById('modalOverlay').classList.remove('open');
 }
 
-// ── CALORIEËN OPZOEKEN ─────────────────────────────────
+// ── CALORIEËN OPZOEKEN ──
 async function opzoeken() {
-  const ak = localStorage.getItem('ct_anthropic_key')||'';
-  const eten = document.getElementById('eten').value.trim();
-  if (!eten) { setStatus('Vul eerst in wat je hebt gegeten.','err'); return; }
-  if (!ak) { setStatus('Vul je Anthropic API key in bij Instellingen.','err'); return; }
+  const ak=localStorage.getItem('ct_anthropicKey')||'';
+  const eten=document.getElementById('eten').value.trim();
+  if(!eten){setStatus('Vul eerst in wat je hebt gegeten.','err');return;}
+  if(!ak){setStatus('Vul je Anthropic API key in bij Instellingen.','err');return;}
   setStatus('Calorieën opzoeken...','loading');
-  document.getElementById('btnOpzoeken').disabled = true;
+  document.getElementById('btnOpzoeken').disabled=true;
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:200,
         messages:[{role:'user',content:`Bereken kcal en eiwitten voor: "${eten}". Geen apostrofs. Alleen JSON: {"kcal":450,"eiwitten":22,"toelichting":"uitleg"}`}]})
     });
-    const data = await resp.json();
-    if (data.error) throw new Error(data.error.message);
-    const p = safeJSON(data.content.map(b=>b.text||'').join(''));
-    document.getElementById('kcal').value = p.kcal;
-    document.getElementById('eiwitten').value = p.eiwitten;
-    const t = document.getElementById('toelichting');
-    t.textContent = p.toelichting||''; t.className='toelichting show';
+    const data=await resp.json();
+    if(data.error) throw new Error(data.error.message);
+    const p=safeJSON(data.content.map(b=>b.text||'').join(''));
+    document.getElementById('kcal').value=p.kcal;
+    document.getElementById('eiwitten').value=p.eiwitten;
+    const t=document.getElementById('toelichting');
+    t.textContent=p.toelichting||''; t.className='toelichting show';
     setStatus('✓ Gevonden! Controleer en voer in.','ok');
-  } catch(e) { setStatus('Fout: '+e.message,'err'); }
-  document.getElementById('btnOpzoeken').disabled = false;
+  } catch(e){setStatus('Fout: '+e.message,'err');}
+  document.getElementById('btnOpzoeken').disabled=false;
 }
 
-// ── IN SHEET INVOEREN ──────────────────────────────────
+// ── MAALTIJD TOEVOEGEN ──
 async function invoeren() {
-  const gk = localStorage.getItem('ct_google_key')||'';
-  const sid = localStorage.getItem('ct_sheetid')||document.getElementById('sheetId').value.trim();
-  const scriptUrl = localStorage.getItem('ct_script_url')||'';
-  const datum = document.getElementById('datum').value;
-  const etenRaw = document.getElementById('eten').value.trim();
-  const kcal = document.getElementById('kcal').value;
-  const eiwitten = document.getElementById('eiwitten').value;
-  if (!etenRaw) { setStatus('Vul in wat je hebt gegeten.','err'); return; }
-  if (!kcal) { setStatus('Zoek eerst calorieën op of vul ze in.','err'); return; }
+  const gk=localStorage.getItem('ct_googleKey')||'';
+  const sid=localStorage.getItem('ct_sheetId')||document.getElementById('sheetId').value.trim();
+  const scriptUrl=localStorage.getItem('ct_appsScriptUrl')||'';
+  const datum=document.getElementById('datum').value;
+  const etenRaw=document.getElementById('eten').value.trim();
+  const kcal=document.getElementById('kcal').value;
+  const eiwitten=document.getElementById('eiwitten').value;
+  if(!etenRaw){setStatus('Vul in wat je hebt gegeten.','err');return;}
+  if(!kcal){setStatus('Zoek eerst calorieën op of vul ze in.','err');return;}
 
-  const etenFmt = etenRaw.split('\n').map(r=>r.trim()).filter(r=>r).map(r=>r.startsWith('-')?r:'- '+r).join('\n');
+  const etenFmt=etenRaw.split('\n').map(r=>r.trim()).filter(r=>r).map(r=>r.startsWith('-')?r:'- '+r).join('\n');
   setStatus('Verbinden met sheet...','loading');
-  document.getElementById('btnInvoeren').disabled = true;
+  document.getElementById('btnInvoeren').disabled=true;
 
   try {
-    const rows = (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${SHEET_NAME}?key=${gk}`)).json()).values||[];
-    const zoek = dutchDate(datum);
-    let targetRow = -1;
-    for (let i = 0; i < rows.length; i++) {
-      const cel = (rows[i][1]||'').toLowerCase().trim();
-      if (!cel) continue;
-      const parts = zoek.toLowerCase().split(' ');
-      if (cel.includes(parts[0]) && cel.includes(parts[1])) {
-        for (let j = i; j < Math.min(i+10,rows.length); j++) {
-          if ((rows[j][3]||'').trim().toLowerCase()===selectedMaaltijd.toLowerCase()) { targetRow=j+1; break; }
+    const rows=(await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${SHEET_NAME}?key=${gk}`)).json()).values||[];
+    const zoek=isoToZoekString(datum);
+    let targetRow=-1;
+
+    for(let i=0;i<rows.length;i++){
+      const cel=(rows[i][1]||'').toLowerCase().trim();
+      if(cel===zoek.toLowerCase()){
+        for(let j=i;j<Math.min(i+10,rows.length);j++){
+          if((rows[j][3]||'').trim().toLowerCase()===selectedMaaltijd.toLowerCase()){targetRow=j+1;break;}
         }
         break;
       }
     }
-    if (targetRow===-1) throw new Error('Datum of maaltijd niet gevonden in sheet.');
 
-    if (scriptUrl) {
-      // Via Apps Script (geen OAuth probleem)
-      const writeResp = await fetch(scriptUrl, {
-        method:'POST',
-        body: JSON.stringify({ sheetId: sid, sheet: SHEET_NAME, range: `E${targetRow}:G${targetRow}`, values: [etenFmt, Number(eiwitten), Number(kcal)] })
-      });
-      if (!writeResp.ok) throw new Error('Apps Script fout');
+    if(targetRow===-1) throw new Error(`Datum "${zoek}" of maaltijd "${selectedMaaltijd}" niet gevonden in sheet.`);
+
+    if(scriptUrl) {
+      await fetch(scriptUrl,{method:'POST',body:JSON.stringify({sheetId:sid,sheet:SHEET_NAME,range:`E${targetRow}:G${targetRow}`,values:[etenFmt,Number(eiwitten),Number(kcal)]})});
     } else {
-      // Via API key (werkt alleen voor lezen, geeft permission error voor schrijven)
-      const range = `${SHEET_NAME}!E${targetRow}:G${targetRow}`;
-      const wr = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED&key=${gk}`, {
-        method:'PUT', headers:{'Content-Type':'application/json'},
+      const range=`${SHEET_NAME}!E${targetRow}:G${targetRow}`;
+      const wr=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED&key=${gk}`,{
+        method:'PUT',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({values:[[etenFmt,Number(eiwitten),Number(kcal)]]})
       });
-      if (!wr.ok) {
-        const err = await wr.json();
-        if (err.error?.status==='PERMISSION_DENIED') throw new Error('Schrijftoegang vereist Apps Script. Zie Instellingen → Apps Script URL.');
-        throw new Error(err.error?.message||'Schrijffout');
-      }
+      if(!wr.ok){const err=await wr.json();throw new Error(err.error?.message||'Schrijffout. Voeg Apps Script URL toe bij Instellingen.');}
     }
 
-    setStatus(`✓ ${selectedMaaltijd} ingevoerd!`,'ok');
+    setStatus(`✓ ${selectedMaaltijd} toegevoegd!`,'ok');
     bumpStreak();
     wisInvoer();
+    // Vernieuw cache suggesties zodat al ingevulde maaltijden worden uitgesloten
+    localStorage.removeItem('ct_sug_'+datum);
     setTimeout(()=>laadDag(), 800);
-  } catch(e) { setStatus('Fout: '+e.message,'err'); }
-  document.getElementById('btnInvoeren').disabled = false;
+  } catch(e){setStatus('Fout: '+e.message,'err');}
+  document.getElementById('btnInvoeren').disabled=false;
 }
+
+// Hidden datum input
+const datumInput = document.createElement('input');
+datumInput.type='date'; datumInput.id='datum'; datumInput.style.display='none';
+document.body.appendChild(datumInput);
 
 init();
 </script>
