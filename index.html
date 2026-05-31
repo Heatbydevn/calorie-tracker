@@ -350,9 +350,15 @@ function switchTab(n) { goTab(n); }
 
 // ── DATUM ──────────────────────────────────────────────
 function init() {
+  // Gebruik Intl.DateTimeFormat om tijdzone-proof de lokale datum te krijgen
   const now = new Date();
-  // Forceer lokale datum ongeacht tijdzone
-  const iso = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  const parts = new Intl.DateTimeFormat('nl-NL', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+  }).formatToParts(now);
+  const dp = {};
+  parts.forEach(p => dp[p.type] = p.value);
+  const iso = dp.year + '-' + dp.month + '-' + dp.day;
   document.getElementById('datum').value = iso;
   updateDatumLabel(iso);
   const ak = localStorage.getItem('ct_anthropic_key');
@@ -521,20 +527,25 @@ async function laadDag() {
     }
 
     // Gewicht tonen met progressie
+    // Zoek het eerste gewicht in de hele sheet (startgewicht)
+    let startGewicht = null;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i][2] && rows[i][2].toString().trim() !== '') {
+        const val = parseFloat(rows[i][2].toString().replace(',', '.'));
+        if (!isNaN(val)) { startGewicht = val; break; }
+      }
+    }
+
     if (gewicht) {
       const gewichtNum = parseFloat(gewicht.replace(',', '.'));
-      // Sla startgewicht op (eerste keer)
-      if (!localStorage.getItem('ct_start_gewicht')) {
-        localStorage.setItem('ct_start_gewicht', gewichtNum);
-      }
-      const startGewicht = parseFloat(localStorage.getItem('ct_start_gewicht'));
-      const verschil = gewichtNum - startGewicht;
-      const pctProgress = Math.min(Math.max((startGewicht - gewichtNum) / (startGewicht * 0.1) * 100, 0), 100);
+      const start = startGewicht || gewichtNum;
+      const verschil = gewichtNum - start;
+      const pctProgress = start === gewichtNum ? 50 : Math.min(Math.max(50 + ((start - gewichtNum) / (start * 0.1) * 50), 0), 100);
 
       document.getElementById('gewichtVal').textContent = gewicht;
-      document.getElementById('gewichtStart').textContent = startGewicht + ' kg';
+      document.getElementById('gewichtStart').textContent = start.toString().replace('.', ',') + ' kg';
       const diffEl = document.getElementById('gewichtDiff');
-      diffEl.textContent = (verschil <= 0 ? '' : '+') + verschil.toFixed(1) + ' kg';
+      diffEl.textContent = (verschil <= 0 ? '' : '+') + verschil.toFixed(1).replace('.', ',') + ' kg';
       diffEl.className = 'gewicht-diff' + (verschil > 0 ? ' gain' : '');
       document.getElementById('gewichtBar').style.width = pctProgress + '%';
       document.getElementById('gewichtRow').style.display = 'block';
