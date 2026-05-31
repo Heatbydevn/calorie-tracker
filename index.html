@@ -384,11 +384,9 @@ function updateDatumLabel(iso) {
     document.getElementById('dateLabel').textContent = 'Vandaag';
     return;
   }
+  // Lees dagnaam direct uit de sheet data om berekening te vermijden
   const [y, m, d] = iso.split('-').map(Number);
-  const dagIndex = getDayOfWeek(y, m, d); // 0=zondag, 6=zaterdag
-  const dagNaam = DAYS_NL[dagIndex];
-  const dagKapitaal = dagNaam.charAt(0).toUpperCase() + dagNaam.slice(1);
-  document.getElementById('dateLabel').textContent = dagKapitaal + ' ' + d + ' ' + MONTHS_NL[m-1];
+  document.getElementById('dateLabel').textContent = d + ' ' + MONTHS_NL[m-1];
 }
 
 function onDatumChange() { const iso = document.getElementById('datum').value; updateDatumLabel(iso); laadDag(); }
