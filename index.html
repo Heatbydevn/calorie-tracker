@@ -81,6 +81,20 @@ body { font-family: -apple-system, 'DM Sans', sans-serif; min-height: 100vh; ove
 .gewicht-input { width: 80px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 14px; padding: 6px 10px; outline: none; text-align: center; }
 .gewicht-btn { background: linear-gradient(135deg, rgba(140,90,255,0.8), rgba(80,160,255,0.8)); border: none; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 600; padding: 6px 12px; cursor: pointer; }
 
+/* Gewicht */
+.gewicht-card { margin-top: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px; }
+.gewicht-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; text-align: center; }
+.gewicht-label { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+.gewicht-val { font-size: 20px; font-weight: 700; color: rgba(255,255,255,0.9); }
+.gewicht-start { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.5); }
+.gewicht-diff { font-size: 16px; font-weight: 700; color: #50dc8c; }
+.gewicht-diff.gain { color: #ff7070; }
+.gewicht-progress-wrap { height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; margin-bottom: 12px; }
+.gewicht-progress-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #ff7070, #50dc8c); transition: width 0.6s ease; }
+.gewicht-edit { display: flex; gap: 8px; }
+.gewicht-input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #fff; font-size: 14px; padding: 9px 12px; outline: none; }
+.gewicht-btn { background: linear-gradient(135deg, rgba(140,90,255,0.8), rgba(80,160,255,0.8)); border: none; border-radius: 10px; color: #fff; font-size: 13px; font-weight: 600; padding: 9px 14px; cursor: pointer; white-space: nowrap; }
+
 /* Streak */
 .streak-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px 14px; background: rgba(255,180,0,0.08); border: 1px solid rgba(255,180,0,0.2); border-radius: 12px; }
 .streak-icon { font-size: 22px; }
@@ -188,14 +202,25 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
             <div class="stat-item"><div class="stat-num" id="statEiwit">—</div><div class="stat-label">eiwit</div></div>
             <div class="stat-item"><div class="stat-num" id="statStreak">🔥 0</div><div class="stat-label">streak</div></div>
           </div>
-          <div class="gewicht-row" id="gewichtRow" style="display:none;">
-            <div class="gewicht-info">
-              <div class="gewicht-val" id="gewichtVal">—</div>
-              <div class="gewicht-label">Huidig gewicht</div>
+          <div class="gewicht-card" id="gewichtRow" style="display:none;">
+            <div class="gewicht-top">
+              <div>
+                <div class="gewicht-label">Huidig gewicht</div>
+                <div class="gewicht-val" id="gewichtVal">—</div>
+              </div>
+              <div>
+                <div class="gewicht-label">Start</div>
+                <div class="gewicht-start" id="gewichtStart">—</div>
+              </div>
+              <div>
+                <div class="gewicht-label">Verschil</div>
+                <div class="gewicht-diff" id="gewichtDiff">—</div>
+              </div>
             </div>
+            <div class="gewicht-progress-wrap"><div class="gewicht-progress-bar" id="gewichtBar" style="width:50%"></div></div>
             <div class="gewicht-edit">
-              <input class="gewicht-input" type="text" id="gewichtInput" placeholder="bijv. 82 kg" />
-              <button class="gewicht-btn" onclick="slaGewichtOp()">↑</button>
+              <input class="gewicht-input" type="text" id="gewichtInput" placeholder="Nieuw gewicht bijv. 82 kg" />
+              <button class="gewicht-btn" onclick="slaGewichtOp()">Opslaan</button>
             </div>
           </div>
         </div>
@@ -303,8 +328,11 @@ let touchStartY = 0;
 
 // ── SWIPE ──────────────────────────────────────────────
 const slider = document.getElementById('pagesSlider');
-slider.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; }, { passive: true });
-slider.addEventListener('touchend', e => {
+document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+document.addEventListener('touchend', e => {
   const dx = e.changedTouches[0].clientX - touchStartX;
   const dy = e.changedTouches[0].clientY - touchStartY;
   if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
@@ -322,8 +350,9 @@ function switchTab(n) { goTab(n); }
 
 // ── DATUM ──────────────────────────────────────────────
 function init() {
-  const d = new Date();
-  const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  const now = new Date();
+  // Forceer lokale datum ongeacht tijdzone
+  const iso = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
   document.getElementById('datum').value = iso;
   updateDatumLabel(iso);
   const ak = localStorage.getItem('ct_anthropic_key');
@@ -491,10 +520,24 @@ async function laadDag() {
       }
     }
 
-    // Gewicht tonen
+    // Gewicht tonen met progressie
     if (gewicht) {
+      const gewichtNum = parseFloat(gewicht.replace(',', '.'));
+      // Sla startgewicht op (eerste keer)
+      if (!localStorage.getItem('ct_start_gewicht')) {
+        localStorage.setItem('ct_start_gewicht', gewichtNum);
+      }
+      const startGewicht = parseFloat(localStorage.getItem('ct_start_gewicht'));
+      const verschil = gewichtNum - startGewicht;
+      const pctProgress = Math.min(Math.max((startGewicht - gewichtNum) / (startGewicht * 0.1) * 100, 0), 100);
+
       document.getElementById('gewichtVal').textContent = gewicht;
-      document.getElementById('gewichtRow').style.display = 'flex';
+      document.getElementById('gewichtStart').textContent = startGewicht + ' kg';
+      const diffEl = document.getElementById('gewichtDiff');
+      diffEl.textContent = (verschil <= 0 ? '' : '+') + verschil.toFixed(1) + ' kg';
+      diffEl.className = 'gewicht-diff' + (verschil > 0 ? ' gain' : '');
+      document.getElementById('gewichtBar').style.width = pctProgress + '%';
+      document.getElementById('gewichtRow').style.display = 'block';
     }
 
     if (!gevonden) { dagContent.innerHTML = '<div class="dag-loading">Geen data voor deze datum</div>'; updateHero(0, doel, 0); return; }
@@ -543,6 +586,27 @@ function updateHero(gegeten, doel, eiwit) {
 }
 
 // ── SUGGESTIES ─────────────────────────────────────────
+function buildSuggestiesPrompt(resterend, dagNr) {
+  const uur = new Date().getHours();
+  // Bepaal welke maaltijden nog komen op basis van tijdstip
+  let nogTeKomen = [];
+  if (uur < 10) nogTeKomen = ['Ontbijt', 'Lunch', 'Avondeten', 'Snack'];
+  else if (uur < 13) nogTeKomen = ['Lunch', 'Avondeten', 'Snack'];
+  else if (uur < 17) nogTeKomen = ['Avondeten', 'Snack'];
+  else nogTeKomen = ['Avondeten', 'Snack'];
+
+  // Haal al ingevulde maaltijden op
+  const dagContent = document.getElementById('dagContent').innerHTML;
+  const alIngevuld = ['Ontbijt','Lunch','Avondeten','Snack'].filter(m => {
+    const rij = dagContent.includes(m) && !dagContent.includes(`>${m}</div></div><div style`);
+    return rij;
+  });
+
+  const beschikbaar = nogTeKomen.filter(m => !alIngevuld.includes(m));
+  const maaltijdenTekst = beschikbaar.length > 0 ? beschikbaar.join(', ') : nogTeKomen.join(', ');
+
+  return `Het is ${uur}:00 uur. Ik heb nog ${resterend} kcal over vandaag (dag ${dagNr} van de week). De maaltijden die nog komen zijn: ${maaltijdenTekst}. Geef 3 tot 4 gevarieerde lekkere suggesties alleen voor deze maaltijdmomenten. Reageer ALLEEN met geldig JSON zonder apostrofs in tekst: {"suggesties":[{"naam":"Kipfilet met rijst","kcal":450,"maaltijd":"Avondeten","beschrijving":"Gezond en vullend"}]}`;
+}
 async function laadSuggesties(force = false) {
   const resterend = parseInt(document.getElementById('heroNum').textContent) || 0;
   const isOverDoel = document.getElementById('heroSub').textContent.includes('boven');
@@ -563,7 +627,7 @@ async function laadSuggesties(force = false) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': anthropicKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
       body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 600,
-        messages: [{ role: 'user', content: `Ik heb nog ${resterend} kcal over vandaag (dag ${dagNr} van de week). Geef 4 gevarieerde lekkere maaltijdsuggesties die passen binnen dit budget. Wissel af tussen ontbijt, lunch, avondeten en snack. Reageer ALLEEN met geldig JSON zonder speciale tekens of aanhalingstekens in de strings, gebruik geen apostrofs in de namen: {"suggesties":[{"naam":"Griekse yoghurt met granola","kcal":280,"maaltijd":"Ontbijt","beschrijving":"Romig en vullend"},{"naam":"Kipfilet met rijst en groenten","kcal":450,"maaltijd":"Avondeten","beschrijving":"Gezond en vullend"}]}` }] })
+        messages: [{ role: 'user', content: buildSuggestiesPrompt(resterend, dagNr) }] })
     });
     const data = await resp.json();
     if (data.error) throw new Error(data.error.message);
