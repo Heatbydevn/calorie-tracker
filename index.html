@@ -350,15 +350,7 @@ function switchTab(n) { goTab(n); }
 
 // ── DATUM ──────────────────────────────────────────────
 function init() {
-  // Gebruik Intl.DateTimeFormat om tijdzone-proof de lokale datum te krijgen
-  const now = new Date();
-  const parts = new Intl.DateTimeFormat('nl-NL', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-  }).formatToParts(now);
-  const dp = {};
-  parts.forEach(p => dp[p.type] = p.value);
-  const iso = dp.year + '-' + dp.month + '-' + dp.day;
+  const iso = getLocalIso();
   document.getElementById('datum').value = iso;
   updateDatumLabel(iso);
   const ak = localStorage.getItem('ct_anthropic_key');
@@ -371,20 +363,21 @@ function init() {
   if (gk && (sid || document.getElementById('sheetId').value)) laadDag();
 }
 
+function getLocalIso() {
+  // Meest betrouwbare methode: gebruik offset van browser zelf
+  const now = new Date();
+  const offset = now.getTimezoneOffset() * 60000;
+  const local = new Date(now.getTime() - offset);
+  return local.toISOString().slice(0, 10);
+}
+
 function updateDatumLabel(iso) {
   const [y, m, d] = iso.split('-').map(Number);
   const date = new Date(y, m-1, d);
-  // Haal vandaag ook op via Intl om tijdzone te vermijden
-  const now = new Date();
-  const parts = new Intl.DateTimeFormat('nl-NL', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-  }).formatToParts(now);
-  const dp = {};
-  parts.forEach(p => dp[p.type] = p.value);
-  const todayIso = dp.year + '-' + dp.month + '-' + dp.day;
-  const isToday = iso === todayIso;
-  document.getElementById('dateLabel').textContent = isToday ? 'Vandaag' : DAYS_NL[date.getDay()].charAt(0).toUpperCase() + DAYS_NL[date.getDay()].slice(1) + ' ' + d + ' ' + MONTHS_NL[m-1];
+  const isToday = iso === getLocalIso();
+  document.getElementById('dateLabel').textContent = isToday
+    ? 'Vandaag'
+    : DAYS_NL[date.getDay()].charAt(0).toUpperCase() + DAYS_NL[date.getDay()].slice(1) + ' ' + d + ' ' + MONTHS_NL[m-1];
 }
 
 function onDatumChange() { const iso = document.getElementById('datum').value; updateDatumLabel(iso); laadDag(); }
