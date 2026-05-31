@@ -371,16 +371,22 @@ function getLocalIso() {
     String(now.getDate()).padStart(2, '0');
 }
 
+function getDayOfWeek(y, m, d) {
+  // Tomohiko Sakamoto algoritme - werkt altijd correct ongeacht browser/OS
+  const t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
+  if (m < 3) y--;
+  return (y + Math.floor(y/4) - Math.floor(y/100) + Math.floor(y/400) + t[m-1] + d) % 7;
+}
+
 function updateDatumLabel(iso) {
   const isToday = iso === getLocalIso();
   if (isToday) {
     document.getElementById('dateLabel').textContent = 'Vandaag';
     return;
   }
-  // Bereken dagnaam via Intl om iOS bugs te vermijden
   const [y, m, d] = iso.split('-').map(Number);
-  const date = new Date(y, m-1, d);
-  const dagNaam = date.toLocaleDateString('nl-NL', { weekday: 'long' });
+  const dagIndex = getDayOfWeek(y, m, d); // 0=zondag, 6=zaterdag
+  const dagNaam = DAYS_NL[dagIndex];
   const dagKapitaal = dagNaam.charAt(0).toUpperCase() + dagNaam.slice(1);
   document.getElementById('dateLabel').textContent = dagKapitaal + ' ' + d + ' ' + MONTHS_NL[m-1];
 }
@@ -389,10 +395,14 @@ function onDatumChange() { const iso = document.getElementById('datum').value; u
 
 function changeDate(delta) {
   const iso = document.getElementById('datum').value;
-  const [y, m, d] = iso.split('-').map(Number);
-  const date = new Date(y, m-1, d);
-  date.setDate(date.getDate() + delta);
-  const newIso = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
+  // Reken puur met getallen, geen Date object om iOS bugs te vermijden
+  let [y, m, d] = iso.split('-').map(Number);
+  d += delta;
+  // Corrigeer dag overflow/underflow
+  const daysInMonth = (month, year) => new Date(year, month, 0).getDate();
+  if (d < 1) { m--; if (m < 1) { m = 12; y--; } d = daysInMonth(m, y); }
+  if (d > daysInMonth(m, y)) { d = 1; m++; if (m > 12) { m = 1; y++; } }
+  const newIso = y + '-' + String(m).padStart(2,'0') + '-' + String(d).padStart(2,'0');
   document.getElementById('datum').value = newIso;
   updateDatumLabel(newIso);
   laadDag();
