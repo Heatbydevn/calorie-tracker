@@ -531,6 +531,7 @@ async function laadDag() {
       const parts = zoekDatum.toLowerCase().split(' '); // "30 mei"
       if (cel.includes(parts[0]) && cel.includes(parts[1])) {
         gevonden = true;
+        window._sheetDatumTekst = rows[i][1]; // sla exacte tekst op uit sheet
         if (rows[i][2]) gewicht = rows[i][2];
         for (let j = i; j < Math.min(i+10, rows.length); j++) {
           const maaltijd = (rows[j][3] || '').trim();
@@ -572,6 +573,12 @@ async function laadDag() {
     const totaalKcal = Object.values(dagData).reduce((s,m) => s + m.kcal, 0);
     const totaalEiwit = Object.values(dagData).reduce((s,m) => s + m.eiwitten, 0);
     updateHero(totaalKcal, doel, totaalEiwit);
+    // Update badge met exacte tekst uit sheet
+    if (window._sheetDatumTekst) {
+      const tekst = window._sheetDatumTekst;
+      const kapitaal = tekst.charAt(0).toUpperCase() + tekst.slice(1);
+      document.getElementById('dateLabel').textContent = kapitaal;
+    }
 
     const maaltijdHTML = MAALTIJDEN.map(m => {
       const info = dagData[m];
