@@ -371,22 +371,23 @@ function getLocalIso() {
     String(now.getDate()).padStart(2, '0');
 }
 
-function getDayOfWeek(y, m, d) {
-  // Tomohiko Sakamoto algoritme - werkt altijd correct ongeacht browser/OS
-  const t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
-  if (m < 3) y--;
-  return (y + Math.floor(y/4) - Math.floor(y/100) + Math.floor(y/400) + t[m-1] + d) % 7;
-}
-
 function updateDatumLabel(iso) {
   const isToday = iso === getLocalIso();
   if (isToday) {
     document.getElementById('dateLabel').textContent = 'Vandaag';
     return;
   }
-  // Lees dagnaam direct uit de sheet data om berekening te vermijden
   const [y, m, d] = iso.split('-').map(Number);
-  document.getElementById('dateLabel').textContent = d + ' ' + MONTHS_NL[m-1];
+  // Zeller's congruence - puur wiskundig, geen Date object
+  let cy = y, cm = m;
+  if (cm < 3) { cm += 12; cy--; }
+  const k = cy % 100, j = Math.floor(cy / 100);
+  const h = (d + Math.floor(13*(cm+1)/5) + k + Math.floor(k/4) + Math.floor(j/4) - 2*j) % 7;
+  // h: 0=za, 1=zo, 2=ma, 3=di, 4=wo, 5=do, 6=vr
+  const dagIndex = [6, 0, 1, 2, 3, 4, 5][h]; // omzetten naar 0=zo...6=za
+  const dagNaam = DAYS_NL[dagIndex];
+  const label = dagNaam.charAt(0).toUpperCase() + dagNaam.slice(1) + ' ' + d + ' ' + MONTHS_NL[m-1];
+  document.getElementById('dateLabel').textContent = label;
 }
 
 function onDatumChange() { const iso = document.getElementById('datum').value; updateDatumLabel(iso); laadDag(); }
@@ -573,12 +574,7 @@ async function laadDag() {
     const totaalKcal = Object.values(dagData).reduce((s,m) => s + m.kcal, 0);
     const totaalEiwit = Object.values(dagData).reduce((s,m) => s + m.eiwitten, 0);
     updateHero(totaalKcal, doel, totaalEiwit);
-    // Update badge met exacte tekst uit sheet
-    if (window._sheetDatumTekst) {
-      const tekst = window._sheetDatumTekst;
-      const kapitaal = tekst.charAt(0).toUpperCase() + tekst.slice(1);
-      document.getElementById('dateLabel').textContent = kapitaal;
-    }
+
 
     const maaltijdHTML = MAALTIJDEN.map(m => {
       const info = dagData[m];
