@@ -571,7 +571,9 @@ async function laadDag() {
       if (cel === zoek.toLowerCase()) {
         gevonden=true;
         if (rows[i][2]) gewicht=rows[i][2];
-        for (let j=i; j<Math.min(i+10,rows.length); j++) {
+        for (let j=i; j<rows.length; j++) {
+          // Stop als een nieuwe datum-rij begint
+          if (j > i && (rows[j][1]||'').toLowerCase().trim()) break;
           const mt=(rows[j][3]||'').trim();
           if (MAALTIJDEN.includes(mt)) dagData[mt]={eten:rows[j][4]||'',kcal:parseInt(rows[j][6])||0,eiwitten:parseInt(rows[j][5])||0};
         }
@@ -739,7 +741,8 @@ async function invoeren() {
     for(let i=0;i<rows.length;i++){
       const cel=(rows[i][1]||'').toLowerCase().trim();
       if(cel===zoek.toLowerCase()){
-        for(let j=i;j<Math.min(i+10,rows.length);j++){
+        for(let j=i;j<rows.length;j++){
+          if(j>i&&(rows[j][1]||'').toLowerCase().trim()) break;
           if((rows[j][3]||'').trim().toLowerCase()===selectedMaaltijd.toLowerCase()){targetRow=j+1;break;}
         }
         break;
