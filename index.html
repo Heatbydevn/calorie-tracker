@@ -561,6 +561,12 @@ function init() {
   if (naam) document.getElementById('heroGreeting').textContent = `Hi ${naam} 👋`;
 
   updateStreak();
+
+  // Toon gewicht meteen op basis van cached waarden
+  const cachedGewicht = localStorage.getItem('ct_last_gewicht');
+  const cachedStart = parseFloat(localStorage.getItem('ct_start_gewicht_val'));
+  if (cachedGewicht) updateGewichtCard(cachedGewicht, cachedStart || null);
+
   const gk = localStorage.getItem('ct_googleKey');
   if (gk) { laadDag(); laadWeek(); }
 }
@@ -672,7 +678,7 @@ function updateGewichtCard(huidig, startGewicht) {
   const doelStr = localStorage.getItem('ct_profielGewichtsDoel')||'';
   const doelNum = parseFloat(doelStr.replace(',','.'));
   const huidigNum = parseFloat(huidig.replace(',','.'));
-  const startNum = startGewicht;
+  const startNum = startGewicht || huidigNum;
 
   document.getElementById('gewichtHuidig').textContent = huidig;
 
@@ -687,7 +693,8 @@ function updateGewichtCard(huidig, startGewicht) {
   }
 
   if (!isNaN(doelNum)) {
-    document.getElementById('gewichtDoelLabel').textContent = doelStr;
+    const doelDisplay = doelStr.includes('kg') ? doelStr : doelStr + ' kg';
+    document.getElementById('gewichtDoelLabel').textContent = doelDisplay;
     const totaalTeVerliezen = startNum - doelNum;
     const alVerloren = startNum - huidigNum;
     const pct = totaalTeVerliezen > 0 ? Math.min(Math.max((alVerloren/totaalTeVerliezen)*100, 0), 100) : 0;
@@ -761,7 +768,14 @@ async function laadDag() {
 
     _huidigeDagData = dagData;
 
-    if (gewicht&&startGewicht) updateGewichtCard(gewicht, startGewicht);
+    // Altijd gewicht card tonen - gebruik laatste bekende waarde uit localStorage als fallback
+    if (gewicht) {
+      localStorage.setItem('ct_last_gewicht', gewicht);
+      if (startGewicht) localStorage.setItem('ct_start_gewicht_val', startGewicht);
+    }
+    const displayGewicht = gewicht || localStorage.getItem('ct_last_gewicht');
+    const displayStart = startGewicht || parseFloat(localStorage.getItem('ct_start_gewicht_val'));
+    if (displayGewicht) updateGewichtCard(displayGewicht, displayStart);
 
     if (!gevonden) { dagContent.innerHTML='<div class="dag-loading">Geen data voor deze datum</div>'; updateHero(0,doel,0); return; }
 
