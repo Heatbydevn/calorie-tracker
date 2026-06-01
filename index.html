@@ -55,20 +55,22 @@ body { font-family: -apple-system, 'DM Sans', sans-serif; min-height: 100vh; ove
 
 /* Gewicht progressie */
 .gewicht-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 16px; }
-.gewicht-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; text-align: center; }
+.gewicht-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .gewicht-lbl { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
-.gewicht-val { font-size: 20px; font-weight: 700; color: rgba(255,255,255,0.9); }
-.gewicht-start-val { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.5); }
-.gewicht-diff-val { font-size: 16px; font-weight: 700; color: #50dc8c; }
-.gewicht-diff-val.gain { color: #ff7070; }
-.doel-progress-wrap { margin-bottom: 8px; }
-.doel-progress-label { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.35); margin-bottom: 6px; }
-.doel-progress-bar-wrap { height: 8px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; }
-.doel-progress-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #ff7070, #ffb432, #50dc8c); transition: width 0.8s ease; }
-.doel-motivatie { font-size: 12px; color: rgba(100,200,255,0.8); text-align: center; margin-top: 8px; font-weight: 500; }
+.gewicht-val { font-size: 28px; font-weight: 700; color: rgba(255,255,255,0.95); letter-spacing: -1px; }
+.gewicht-diff-pill { font-size: 13px; font-weight: 700; color: #50dc8c; background: rgba(80,220,140,0.12); border: 1px solid rgba(80,220,140,0.25); border-radius: 99px; padding: 5px 12px; }
+.gewicht-diff-pill.gain { color: #ff7070; background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.2); }
+.gewicht-doel-wrap { margin-bottom: 12px; }
+.gewicht-doel-info { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 12px; color: rgba(255,255,255,0.35); }
+.gewicht-start-txt { font-weight: 500; }
+.gewicht-arrow { color: rgba(255,255,255,0.2); }
+.gewicht-doel-txt { font-weight: 600; color: rgba(100,200,255,0.7); }
+.doel-progress-bar-wrap { height: 10px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05); }
+.doel-progress-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #ff7070, #ffb432, #50dc8c); transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 0 8px rgba(80,220,140,0.4); }
+.doel-motivatie { font-size: 12px; color: rgba(100,200,255,0.8); font-weight: 500; }
 .gewicht-edit { display: flex; gap: 8px; margin-top: 12px; }
 .gewicht-input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #fff; font-size: 14px; padding: 9px 12px; outline: none; font-family: -apple-system, 'DM Sans', sans-serif; }
-.gewicht-btn { background: linear-gradient(135deg, rgba(140,90,255,0.8), rgba(80,160,255,0.8)); border: none; border-radius: 10px; color: #fff; font-size: 13px; font-weight: 600; padding: 9px 14px; cursor: pointer; }
+.gewicht-btn { background: linear-gradient(135deg, rgba(140,90,255,0.8), rgba(80,160,255,0.8)); border: none; border-radius: 10px; color: #fff; font-size: 16px; font-weight: 600; padding: 9px 16px; cursor: pointer; }
 
 /* Suggesties */
 .suggestie-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: background 0.2s; }
@@ -102,6 +104,27 @@ body { font-family: -apple-system, 'DM Sans', sans-serif; min-height: 100vh; ove
 .maaltijd-sub { font-size: 12px; color: rgba(255,255,255,0.3); line-height: 1.5; }
 .maaltijd-kcal { font-size: 14px; font-weight: 700; color: rgba(160,120,255,1); white-space: nowrap; }
 .dag-loading { font-size: 13px; color: rgba(255,255,255,0.3); text-align: center; padding: 20px; }
+.invoer-datum-badge { font-size: 11px; color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+
+/* Week chart */
+.week-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; margin-bottom: 10px; }
+.week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.week-bar { width: 100%; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, rgba(140,90,255,0.8), rgba(80,160,255,0.6)); min-height: 3px; transition: height 0.5s cubic-bezier(0.34,1.56,0.64,1); position: relative; }
+.week-bar.today { background: linear-gradient(180deg, #50dc8c, #00c6ff); }
+.week-bar.over { background: linear-gradient(180deg, #ff5050, #ff0080); }
+.week-dag { font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 500; text-transform: uppercase; }
+.week-kcal { font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 600; }
+.week-doel-lijn { height: 1px; background: rgba(255,255,255,0.15); margin-bottom: 6px; position: relative; }
+.week-doel-lijn::after { content: 'doel'; position: absolute; right: 0; top: -8px; font-size: 9px; color: rgba(255,255,255,0.25); }
+.week-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.week-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 10px; text-align: center; }
+.week-stat-num { font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.85); }
+.week-stat-label { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+/* Success toast */
+.toast { position: fixed; top: 100px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(80,220,140,0.15); border: 1px solid rgba(80,220,140,0.3); border-radius: 99px; padding: 10px 20px; font-size: 14px; font-weight: 600; color: #50dc8c; backdrop-filter: blur(20px); z-index: 500; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 .dag-refresh { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; width: 30px; height: 30px; color: rgba(255,255,255,0.5); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
 /* Form */
@@ -147,7 +170,6 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
     <div class="header-top">
       <div class="app-title">Calorieën</div>
       <div style="display:flex;align-items:center;gap:8px;">
-        <a class="sheet-btn" id="sheetLink" href="#" target="_blank">↗ Sheet</a>
         <div class="date-nav">
           <button class="date-nav-btn" onclick="changeDate(-1)">‹</button>
           <div class="date-label" id="dateLabel">Vandaag</div>
@@ -164,7 +186,7 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
       <div class="page">
         <div class="card glass hero-card">
           <div class="hero-greeting" id="heroGreeting"></div>
-          <div class="hero-label">Nog te eten vandaag</div>
+          <div class="hero-label" id="heroLabel">Nog te eten vandaag</div>
           <div class="hero-num ok" id="heroNum">—</div>
           <div class="hero-sub" id="heroSub">kcal</div>
           <div class="hero-doel" id="heroDoel">Laden...</div>
@@ -211,7 +233,7 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
       <!-- TAB 1: Invoeren -->
       <div class="page">
         <div class="card glass">
-          <div class="card-title">Maaltijd invoeren</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div class="card-title" style="margin-bottom:0;">Maaltijd invoeren</div><div class="invoer-datum-badge" id="invoerDatumBadge">Vandaag</div></div>
           <div class="field">
             <label>Maaltijdmoment</label>
             <div class="seg-control">
@@ -249,6 +271,16 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
             <button class="dag-refresh" onclick="laadDag()">↻</button>
           </div>
           <div id="dagContent"><div class="dag-loading">Vul je API keys in bij Instellingen</div></div>
+        </div>
+        <div class="card glass">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div class="card-title" style="margin-bottom:0;">📊 Week overzicht</div>
+            <button class="dag-refresh" onclick="laadWeek()">↻</button>
+          </div>
+          <div id="weekContent"><div class="dag-loading">Laden...</div></div>
+        </div>
+        <div class="card glass" style="text-align:center;padding:14px 18px;">
+          <a id="sheetLinkOvz" href="#" target="_blank" style="color:rgba(200,160,255,1);font-size:14px;font-weight:600;text-decoration:none;">↗ Openen in Google Sheet</a>
         </div>
       </div>
 
@@ -310,7 +342,7 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
       <span>Vandaag</span>
     </button>
     <button class="dock-btn" id="dock1" onclick="goTab(1)">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
       <span>Invoeren</span>
     </button>
     <button class="dock-btn" id="dock2" onclick="goTab(2)">
@@ -372,7 +404,13 @@ function isoToZoekString(iso) {
 
 function updateDatumLabel(iso) {
   const isToday = iso === getLocalIso();
-  document.getElementById('dateLabel').textContent = isToday ? 'Vandaag' : isoToDutchLabel(iso);
+  const label = isToday ? 'Vandaag' : isoToDutchLabel(iso);
+  document.getElementById('dateLabel').textContent = label;
+  // Update invoer datum badge
+  if(document.getElementById('invoerDatumBadge')) document.getElementById('invoerDatumBadge').textContent = label;
+  // Update hero label
+  const heroLabel = document.getElementById('heroLabel');
+  if(heroLabel) heroLabel.textContent = isToday ? 'Nog te eten vandaag' : 'Gegeten op ' + label.split(' ').slice(1).join(' ');
 }
 
 function changeDate(delta) {
@@ -406,6 +444,95 @@ function goTab(n) {
 }
 
 // ── INIT ──
+async function slaGewichtOp() {
+  const val = document.getElementById('gewichtInput').value.trim();
+  if (!val) return;
+  const gewicht = val.includes('kg') ? val : val+' kg';
+  document.getElementById('gewichtHuidig').textContent = gewicht;
+  document.getElementById('gewichtInput').value = '';
+  const scriptUrl = localStorage.getItem('ct_appsScriptUrl')||'';
+  const sid = localStorage.getItem('ct_sheetId')||'';
+  const gk = localStorage.getItem('ct_googleKey')||'';
+  const datum = document.getElementById('datum').value;
+  if (!scriptUrl || !sid || !gk) { showToast('✓ Gewicht bijgewerkt (lokaal)'); return; }
+  try {
+    const rows = (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${SHEET_NAME}?key=${gk}`)).json()).values||[];
+    const zoek = isoToZoekString(datum);
+    let targetRow = -1;
+    for (let i=0; i<rows.length; i++) {
+      if ((rows[i][1]||'').toLowerCase().trim() === zoek.toLowerCase()) { targetRow=i+1; break; }
+    }
+    if (targetRow === -1) { showToast('✓ Gewicht bijgewerkt (lokaal)'); return; }
+    await fetch(scriptUrl, { method:'POST', body: JSON.stringify({sheetId:sid,sheet:SHEET_NAME,range:`C${targetRow}`,values:[gewicht]}) });
+    showToast('✓ Gewicht opgeslagen in sheet!');
+    setTimeout(()=>laadDag(), 500);
+  } catch(e) { showToast('✓ Gewicht bijgewerkt (lokaal)'); }
+}
+
+async function laadWeek() {
+  const gk = localStorage.getItem('ct_googleKey')||'';
+  const sid = localStorage.getItem('ct_sheetId')||'';
+  const weekContent = document.getElementById('weekContent');
+  if (!weekContent) return;
+  if (!gk||!sid) { weekContent.innerHTML='<div class="dag-loading">Vul API keys in bij Instellingen</div>'; return; }
+  weekContent.innerHTML='<div class="dag-loading">Laden...</div>';
+  try {
+    const rows = (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${SHEET_NAME}?key=${gk}`)).json()).values||[];
+    const doel = parseInt((rows[2]&&rows[2][1])?rows[2][1]:'2300')||2300;
+    const today = getLocalIso();
+    const dagen = [];
+    for (let i=6; i>=0; i--) {
+      const [y,m,d] = today.split('-').map(Number);
+      const dt = new Date(y,m-1,d-i);
+      const iso = dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+      const zoek = isoToZoekString(iso);
+      const kortLabel = ['Zo','Ma','Di','Wo','Do','Vr','Za'][dt.getDay()];
+      dagen.push({iso, zoek, label:kortLabel, isToday:iso===today, kcal:0});
+    }
+    for (let i=0; i<rows.length; i++) {
+      const cel = (rows[i][1]||'').toLowerCase().trim();
+      if (!cel) continue;
+      for (const dag of dagen) {
+        if (cel === dag.zoek.toLowerCase()) {
+          for (let j=i; j<rows.length; j++) {
+            if (j>i && (rows[j][1]||'').toLowerCase().trim()) break;
+            if ((rows[j][3]||'').trim() === 'Totaal') { dag.kcal=parseInt(rows[j][6])||0; break; }
+          }
+          break;
+        }
+      }
+    }
+    const maxKcal = Math.max(...dagen.map(d=>d.kcal), doel, 1);
+    const totaalWeek = dagen.reduce((s,d)=>s+d.kcal,0);
+    const dagenMet = dagen.filter(d=>d.kcal>0);
+    const gemiddeld = dagenMet.length ? Math.round(totaalWeek/dagenMet.length) : 0;
+    const binnenDoel = dagenMet.filter(d=>d.kcal<=doel).length;
+    const doelPct = (doel/maxKcal)*100;
+
+    const barsHtml = dagen.map(dag => {
+      const pct = (dag.kcal/maxKcal)*100;
+      const klasse = dag.isToday ? 'today' : dag.kcal > doel ? 'over' : '';
+      return `<div class="week-bar-wrap">
+        <div class="week-kcal">${dag.kcal>0?dag.kcal:''}</div>
+        <div class="week-bar ${klasse}" style="height:${Math.max(pct,dag.kcal>0?4:0)}%"></div>
+        <div class="week-dag">${dag.label}</div>
+      </div>`;
+    }).join('');
+
+    weekContent.innerHTML = `
+      <div style="position:relative;">
+        <div class="week-chart">${barsHtml}</div>
+        <div class="week-doel-lijn" style="bottom:${doelPct}%;position:absolute;left:0;right:0;pointer-events:none;"></div>
+      </div>
+      <div class="week-stats">
+        <div class="week-stat"><div class="week-stat-num">${totaalWeek.toLocaleString('nl-NL')}</div><div class="week-stat-label">totaal week</div></div>
+        <div class="week-stat"><div class="week-stat-num">${gemiddeld.toLocaleString('nl-NL')}</div><div class="week-stat-label">gem. per dag</div></div>
+        <div class="week-stat"><div class="week-stat-num">${binnenDoel}/7</div><div class="week-stat-label">binnen doel</div></div>
+        <div class="week-stat"><div class="week-stat-num">${doel.toLocaleString('nl-NL')}</div><div class="week-stat-label">dagdoel</div></div>
+      </div>`;
+  } catch(e) { weekContent.innerHTML=`<div class="dag-loading">Fout: ${e.message}</div>`; }
+}
+
 function init() {
   const iso = getLocalIso();
   document.getElementById('datum').value = iso;
@@ -415,7 +542,8 @@ function init() {
   fields.forEach(f => { const v = localStorage.getItem('ct_'+f); if(v) document.getElementById(f).value = v; });
 
   const sid = localStorage.getItem('ct_sheetId') || '1VVEAaCSI2A1j_YSIcr1lWiIDmmACVgI_1DZK0o7tTqg';
-  document.getElementById('sheetLink').href = `https://docs.google.com/spreadsheets/d/${sid}/edit`;
+  const sheetUrl = `https://docs.google.com/spreadsheets/d/${sid}/edit`;
+  if(document.getElementById('sheetLinkOvz')) document.getElementById('sheetLinkOvz').href = sheetUrl;
 
   // Naam greeting
   const naam = localStorage.getItem('ct_profielNaam');
@@ -423,7 +551,7 @@ function init() {
 
   updateStreak();
   const gk = localStorage.getItem('ct_googleKey');
-  if (gk) laadDag();
+  if (gk) { laadDag(); laadWeek(); }
 }
 
 // ── SETTINGS ──
@@ -431,7 +559,8 @@ function saveSettings() {
   const fields = ['anthropicKey','googleKey','sheetId','appsScriptUrl','profielNaam','profielLeeftijd','profielLengte','profielGewichtsDoel'];
   fields.forEach(f => localStorage.setItem('ct_'+f, document.getElementById(f).value.trim()));
   const sid = document.getElementById('sheetId').value.trim();
-  document.getElementById('sheetLink').href = `https://docs.google.com/spreadsheets/d/${sid}/edit`;
+  const sheetUrlNew = `https://docs.google.com/spreadsheets/d/${sid}/edit`;
+  if(document.getElementById('sheetLinkOvz')) document.getElementById('sheetLinkOvz').href = sheetUrlNew;
 
   // Update greeting
   const naam = document.getElementById('profielNaam').value.trim();
@@ -456,20 +585,59 @@ function wisInvoer() {
   document.getElementById('status').className='status';
 }
 
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
 function safeJSON(text) {
   return JSON.parse(text.replace(/```json|```/g,'').replace(/[\u0000-\u001F\u007F]/g,' ').trim());
 }
 
 // ── STREAK ──
-function updateStreak() {
+function updateStreak(rows) {
+  // Bereken streak op basis van sheet data: hoeveel opeenvolgende dagen heeft er kcal > 0?
   const today = getLocalIso();
-  let streak = parseInt(localStorage.getItem('ct_streak')||'0');
-  const last = localStorage.getItem('ct_streak_last');
+  if (!rows) { 
+    const s = parseInt(localStorage.getItem('ct_streak')||'0');
+    document.getElementById('statStreak').textContent='🔥 '+s; 
+    return; 
+  }
+  // Verzamel alle datums met totaal kcal > 0 uit sheet
+  const dagenMetData = new Set();
+  for (let i=0; i<rows.length; i++) {
+    const cel = (rows[i][1]||'').toLowerCase().trim();
+    if (!cel || cel.includes('datum') || cel.includes('logboek')) continue;
+    // Check totaal rij (kolom D = 'Totaal', kolom G = kcal)
+    for (let j=i; j<rows.length; j++) {
+      if (j>i && (rows[j][1]||'').toLowerCase().trim()) break;
+      if ((rows[j][3]||'').trim() === 'Totaal') {
+        const kcal = parseInt(rows[j][6])||0;
+        if (kcal > 0) {
+          // Zoek de ISO datum voor deze dag
+          for (const iso of Object.keys(window._datumCache||{})) {
+            if (window._datumCache[iso] === cel) { dagenMetData.add(iso); break; }
+          }
+        }
+        break;
+      }
+    }
+  }
+  // Tel aaneengesloten streak terug vanaf gisteren
+  let streak = 0;
   const [y,m,d] = today.split('-').map(Number);
-  let yd=d-1,ym=m,yy=y;
-  if(yd<1){ym--;if(ym<1){ym=12;yy--;}yd=new Date(yy,ym,0).getDate();}
-  const yesterday = yy+'-'+String(ym).padStart(2,'0')+'-'+String(yd).padStart(2,'0');
-  if(last!==today&&last!==yesterday) streak=0;
+  let checkD=d-1,checkM=m,checkY=y;
+  if(checkD<1){checkM--;if(checkM<1){checkM=12;checkY--;}checkD=new Date(checkY,checkM,0).getDate();}
+  for (let i=0; i<30; i++) {
+    const checkIso = checkY+'-'+String(checkM).padStart(2,'0')+'-'+String(checkD).padStart(2,'0');
+    if (!dagenMetData.has(checkIso)) break;
+    streak++;
+    checkD--;
+    if(checkD<1){checkM--;if(checkM<1){checkM=12;checkY--;}checkD=new Date(checkY,checkM,0).getDate();}
+  }
+  localStorage.setItem('ct_streak', streak);
   document.getElementById('statStreak').textContent='🔥 '+streak;
 }
 
@@ -496,28 +664,29 @@ function updateGewichtCard(huidig, startGewicht) {
   const startNum = startGewicht;
 
   document.getElementById('gewichtHuidig').textContent = huidig;
-  document.getElementById('gewichtStart').textContent = startNum.toString().replace('.',',')+' kg';
+  document.getElementById('gewichtStart').textContent = startNum.toString().replace('.',',') + ' kg';
 
   const diff = huidigNum - startNum;
-  const de = document.getElementById('gewichtDiff');
-  de.textContent = (diff<=0?'':'+')+diff.toFixed(1).replace('.',',')+' kg';
-  de.className = 'gewicht-diff-val'+(diff>0?' gain':'');
+  const pill = document.getElementById('gewichtDiff');
+  pill.textContent = (diff <= 0 ? '' : '+') + diff.toFixed(1).replace('.', ',') + ' kg';
+  pill.className = 'gewicht-diff-pill' + (diff > 0 ? ' gain' : '');
 
   if (!isNaN(doelNum)) {
     const totaalTeVerliezen = startNum - doelNum;
     const alVerloren = startNum - huidigNum;
     const pct = totaalTeVerliezen > 0 ? Math.min(Math.max((alVerloren/totaalTeVerliezen)*100, 0), 100) : 0;
-    const nogOver = Math.max(huidigNum - doelNum, 0).toFixed(1).replace('.',',');
+    const nogOver = Math.max(huidigNum - doelNum, 0).toFixed(1).replace('.', ',');
 
-    document.getElementById('gewichtDoelLabel').textContent = `Doel: ${doelStr}`;
-    document.getElementById('gewichtDoelPct').textContent = Math.round(pct)+'%';
-    document.getElementById('gewichtDoelBar').style.width = pct+'%';
+    document.getElementById('gewichtDoelLabel').textContent = 'doel: ' + doelStr;
+    document.getElementById('gewichtDoelBar').style.width = pct + '%';
 
     if (huidigNum <= doelNum) {
-      document.getElementById('gewichtMotivatie').textContent = '🎉 Doel bereikt!';
+      document.getElementById('gewichtMotivatie').textContent = '🎉 Doel bereikt! Geweldig gedaan!';
     } else {
-      document.getElementById('gewichtMotivatie').textContent = `Nog ${nogOver} kg tot je doel — je bent er bijna!`;
+      document.getElementById('gewichtMotivatie').textContent = `Nog ${nogOver} kg te gaan → ${Math.round(pct)}% voltooid`;
     }
+  } else {
+    document.getElementById('gewichtDoelLabel').textContent = 'Stel een doel in bij Profiel';
   }
 
   document.getElementById('gewichtCard').style.display = 'block';
@@ -597,6 +766,8 @@ async function laadDag() {
       return `<div class="maaltijd-rij"><div class="maaltijd-left"><div class="maaltijd-naam" style="color:rgba(255,255,255,0.25)">${mt}</div></div><div style="font-size:13px;color:rgba(255,255,255,0.2);">—</div></div>`;
     }).join('');
     dagContent.innerHTML=`<div class="maaltijd-lijst">${html}</div>`;
+    // Update streak met sheet data
+    updateStreak(rows);
   } catch(e) {
     dagContent.innerHTML=`<div class="dag-loading">Fout: ${e.message}</div>`;
   }
@@ -759,12 +930,12 @@ async function invoeren() {
       if(!wr.ok){const err=await wr.json();throw new Error(err.error?.message||'Schrijffout. Voeg Apps Script URL toe bij Instellingen.');}
     }
 
-    setStatus(`✓ ${selectedMaaltijd} toegevoegd!`,'ok');
+    showToast(`✓ ${selectedMaaltijd} toegevoegd!`);
     bumpStreak();
     wisInvoer();
-    // Vernieuw cache suggesties zodat al ingevulde maaltijden worden uitgesloten
     localStorage.removeItem('ct_sug_'+datum);
-    setTimeout(()=>laadDag(), 800);
+    goTab(0); // terug naar vandaag tab
+    setTimeout(()=>laadDag(), 500);
   } catch(e){setStatus('Fout: '+e.message,'err');}
   document.getElementById('btnInvoeren').disabled=false;
 }
@@ -776,5 +947,6 @@ document.body.appendChild(datumInput);
 
 init();
 </script>
+<div class="toast" id="toast"></div>
 </body>
 </html>
