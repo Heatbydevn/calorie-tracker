@@ -180,6 +180,7 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
       </div>
     </div>
   </div>
+  <input type="date" id="datum" style="display:none;" />
 
   <div class="pages-wrap">
     <div class="pages-slider" id="pagesSlider">
@@ -474,7 +475,7 @@ async function slaGewichtOp() {
       if ((rows[i][1]||'').toLowerCase().trim() === zoek.toLowerCase()) { targetRow=i+1; break; }
     }
     if (targetRow === -1) { showToast('✓ Gewicht bijgewerkt (lokaal)'); return; }
-    await fetch(scriptUrl, { method:'POST', body: JSON.stringify({sheetId:sid,sheet:SHEET_NAME,range:`C${targetRow}`,values:[gewicht]}) });
+    await fetch(scriptUrl, { method:'POST', body: JSON.stringify({sheetId:sid,sheet:SHEET_NAME,range:`C${targetRow}:C${targetRow}`,values:[gewicht]}) });
     showToast('✓ Gewicht opgeslagen in sheet!');
     setTimeout(()=>laadDag(), 500);
   } catch(e) { showToast('✓ Gewicht bijgewerkt (lokaal)'); }
@@ -493,11 +494,15 @@ async function laadWeek() {
     const today = getLocalIso();
     const dagen = [];
     for (let i=6; i>=0; i--) {
-      const [y,m,d] = today.split('-').map(Number);
-      const dt = new Date(y,m-1,d-i);
-      const iso = dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+      // Pure arithmetic - geen new Date() om iOS timezone bugs te vermijden
+      let [y,m,d] = today.split('-').map(Number);
+      d -= i;
+      const dim = (mo,yr) => new Date(yr,mo,0).getDate();
+      if (d < 1) { m--; if(m<1){m=12;y--;} d=dim(m,y)+d; }
+      const iso = y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
       const zoek = isoToZoekString(iso);
-      const kortLabel = ['Zo','Ma','Di','Wo','Do','Vr','Za'][dt.getDay()];
+      const dagIdx = zellerDag(y,m,d);
+      const kortLabel = ['Zo','Ma','Di','Wo','Do','Vr','Za'][dagIdx];
       dagen.push({iso, zoek, label:kortLabel, isToday:iso===today, kcal:0});
     }
     for (let i=0; i<rows.length; i++) {
@@ -542,6 +547,127 @@ async function laadWeek() {
         <div class="week-stat"><div class="week-stat-num">${doel.toLocaleString('nl-NL')}</div><div class="week-stat-label">dagdoel</div></div>
       </div>`;
   } catch(e) { weekContent.innerHTML=`<div class="dag-loading">Fout: ${e.message}</div>`; }
+}
+
+let _editMaaltijd = '';
+let _editTargetRow = -1;
+
+function openEditModal(maaltijd, etenEnc, kcal, eiwitten) {
+  _editMaaltijd = maaltijd;
+  document.getElementById('editTitle').textContent = maaltijd + ' bewerken';
+  document.getElementById('editSubtitle').textContent = kcal + ' kcal · ' + eiwitten + 'g eiwit';
+  document.getElementById('editEten').value = decodeURIComponent(etenEnc);
+  document.getElementById('editKcal').value = kcal;
+  document.getElementById('editEiwitten').value = eiwitten;
+  document.getElementById('editStatus').className = 'status';
+  document.getElementById('editOverlay').classList.add('open');
+
+  // Zoek targetRow
+  const gk = localStorage.getItem('ct_googleKey')||'';
+  const sid = localStorage.getItem('ct_sheetId')||'';
+  const datum = document.getElementById('datum').value;
+  const zoek = isoToZoekString(datum);
+  // We store this for save/delete - fetch rows to find row number
+  _editTargetRow = -1;
+  fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${SHEET_NAME}?key=${gk}`)
+    .then(r=>r.json()).then(data=>{
+      const rows = data.values||[];
+      for(let i=0;i<rows.length;i++){
+        if((rows[i][1]||'').toLowerCase().trim()===zoek.toLowerCase()){
+          for(let j=i;j<rows.length;j++){
+            if(j>i&&(rows[j][1]||'').toLowerCase().trim()) break;
+            if((rows[j][3]||'').trim().toLowerCase()===maaltijd.toLowerCase()){_editTargetRow=j+1;break;}
+          }
+          break;
+        }
+      }
+    }).catch(()=>{});
+}
+
+function sluitEditModal(e) {
+  if(!e||e.target===document.getElementById('editOverlay')) document.getElementById('editOverlay').classList.remove('open');
+}
+
+async function herberekenEdit() {
+  const ak = localStorage.getItem('ct_anthropicKey')||'';
+  const eten = document.getElementById('editEten').value.trim();
+  if(!eten||!ak) return;
+  document.getElementById('editHerbereken').textContent = 'Berekenen...';
+  document.getElementById('editHerbereken').disabled = true;
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:150,
+        messages:[{role:'user',content:`Bereken kcal en eiwitten voor: "${eten}". Alleen JSON: {"kcal":450,"eiwitten":22}`}]})
+    });
+    const data = await resp.json();
+    const p = safeJSON(data.content.map(b=>b.text||'').join(''));
+    document.getElementById('editKcal').value = p.kcal;
+    document.getElementById('editEiwitten').value = p.eiwitten;
+    document.getElementById('editSubtitle').textContent = p.kcal+' kcal · '+p.eiwitten+'g eiwit';
+  } catch(e) {}
+  document.getElementById('editHerbereken').textContent = '🔍 Calorieën herberekenen';
+  document.getElementById('editHerbereken').disabled = false;
+}
+
+async function slaEditOp() {
+  const gk = localStorage.getItem('ct_googleKey')||'';
+  const sid = localStorage.getItem('ct_sheetId')||'';
+  const scriptUrl = localStorage.getItem('ct_appsScriptUrl')||'';
+  const eten = document.getElementById('editEten').value.trim();
+  const kcal = Number(document.getElementById('editKcal').value);
+  const eiwitten = Number(document.getElementById('editEiwitten').value);
+
+  if(_editTargetRow===-1){
+    const el=document.getElementById('editStatus');el.textContent='Even geduld, rij wordt opgezocht...';el.className='status loading';
+    setTimeout(slaEditOp, 1500); return;
+  }
+
+  const el=document.getElementById('editStatus');
+  el.textContent='Opslaan...';el.className='status loading';
+
+  try {
+    const etenFmt = eten.split('\n').map(r=>r.trim()).filter(r=>r).map(r=>r.startsWith('-')?r:'- '+r).join('\n');
+    if(scriptUrl){
+      await fetch(scriptUrl,{method:'POST',body:JSON.stringify({sheetId:sid,sheet:SHEET_NAME,range:`E${_editTargetRow}:G${_editTargetRow}`,values:[etenFmt,eiwitten,kcal]})});
+    } else {
+      const range=`${SHEET_NAME}!E${_editTargetRow}:G${_editTargetRow}`;
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED&key=${gk}`,{
+        method:'PUT',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({values:[[etenFmt,eiwitten,kcal]]})
+      });
+    }
+    document.getElementById('editOverlay').classList.remove('open');
+    showToast('✓ '+_editMaaltijd+' bijgewerkt!');
+    setTimeout(()=>laadDag(), 500);
+  } catch(e){el.textContent='Fout: '+e.message;el.className='status err';}
+}
+
+async function verwijderMaaltijd() {
+  const gk = localStorage.getItem('ct_googleKey')||'';
+  const sid = localStorage.getItem('ct_sheetId')||'';
+  const scriptUrl = localStorage.getItem('ct_appsScriptUrl')||'';
+
+  if(_editTargetRow===-1) return;
+
+  const el=document.getElementById('editStatus');
+  el.textContent='Verwijderen...';el.className='status loading';
+
+  try {
+    if(scriptUrl){
+      await fetch(scriptUrl,{method:'POST',body:JSON.stringify({sheetId:sid,sheet:SHEET_NAME,range:`E${_editTargetRow}:G${_editTargetRow}`,values:['',0,0]})});
+    } else {
+      const range=`${SHEET_NAME}!E${_editTargetRow}:G${_editTargetRow}`;
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED&key=${gk}`,{
+        method:'PUT',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({values:[['',0,0]]})
+      });
+    }
+    document.getElementById('editOverlay').classList.remove('open');
+    showToast('🗑 '+_editMaaltijd+' verwijderd');
+    setTimeout(()=>laadDag(), 500);
+  } catch(e){el.textContent='Fout: '+e.message;el.className='status err';}
 }
 
 function init() {
@@ -615,44 +741,40 @@ function safeJSON(text) {
 
 // ── STREAK ──
 function updateStreak(rows) {
-  // Bereken streak op basis van sheet data: hoeveel opeenvolgende dagen heeft er kcal > 0?
   const today = getLocalIso();
-  if (!rows) { 
+  if (!rows) {
     const s = parseInt(localStorage.getItem('ct_streak')||'0');
-    document.getElementById('statStreak').textContent='🔥 '+s; 
-    return; 
+    document.getElementById('statStreak').textContent='🔥 '+s;
+    return;
   }
-  // Verzamel alle datums met totaal kcal > 0 uit sheet
-  const dagenMetData = new Set();
+  // Bouw een map van zoekstring -> kcal totaal uit de sheet
+  const kcalPerDag = {};
   for (let i=0; i<rows.length; i++) {
     const cel = (rows[i][1]||'').toLowerCase().trim();
-    if (!cel || cel.includes('datum') || cel.includes('logboek')) continue;
-    // Check totaal rij (kolom D = 'Totaal', kolom G = kcal)
+    if (!cel || cel.length < 5) continue;
     for (let j=i; j<rows.length; j++) {
       if (j>i && (rows[j][1]||'').toLowerCase().trim()) break;
       if ((rows[j][3]||'').trim() === 'Totaal') {
-        const kcal = parseInt(rows[j][6])||0;
-        if (kcal > 0) {
-          // Zoek de ISO datum voor deze dag
-          for (const iso of Object.keys(window._datumCache||{})) {
-            if (window._datumCache[iso] === cel) { dagenMetData.add(iso); break; }
-          }
-        }
+        kcalPerDag[cel] = parseInt(rows[j][6])||0;
         break;
       }
     }
   }
-  // Tel aaneengesloten streak terug vanaf gisteren
+  // Tel streak terug vanaf gisteren
   let streak = 0;
-  const [y,m,d] = today.split('-').map(Number);
-  let checkD=d-1,checkM=m,checkY=y;
-  if(checkD<1){checkM--;if(checkM<1){checkM=12;checkY--;}checkD=new Date(checkY,checkM,0).getDate();}
-  for (let i=0; i<30; i++) {
-    const checkIso = checkY+'-'+String(checkM).padStart(2,'0')+'-'+String(checkD).padStart(2,'0');
-    if (!dagenMetData.has(checkIso)) break;
-    streak++;
-    checkD--;
-    if(checkD<1){checkM--;if(checkM<1){checkM=12;checkY--;}checkD=new Date(checkY,checkM,0).getDate();}
+  let [cy,cm,cd] = today.split('-').map(Number);
+  // Check ook vandaag zelf
+  const todayZoek = isoToZoekString(today).toLowerCase();
+  if (kcalPerDag[todayZoek] > 0) streak = 1;
+  // Ga terug in de tijd
+  for (let i=0; i<60; i++) {
+    cd--;
+    const dim = (mo,yr) => new Date(yr,mo,0).getDate();
+    if(cd<1){cm--;if(cm<1){cm=12;cy--;}cd=dim(cm,cy);}
+    const iso = cy+'-'+String(cm).padStart(2,'0')+'-'+String(cd).padStart(2,'0');
+    const zoek = isoToZoekString(iso).toLowerCase();
+    if (kcalPerDag[zoek] > 0) streak++;
+    else break;
   }
   localStorage.setItem('ct_streak', streak);
   document.getElementById('statStreak').textContent='🔥 '+streak;
@@ -787,7 +909,17 @@ async function laadDag() {
       const info=dagData[mt];
       if(info&&info.kcal>0){
         const lines=info.eten.split('\n').map(r=>r.trim()).filter(r=>r).map(r=>`<div>${r.startsWith('-')?r:'- '+r}</div>`).join('');
-        return `<div class="maaltijd-rij"><div class="maaltijd-left"><div class="maaltijd-naam">${mt}</div><div class="maaltijd-sub">${lines}</div></div><div class="maaltijd-kcal">${info.kcal} kcal</div></div>`;
+        const etenEsc = encodeURIComponent(info.eten);
+        return `<div class="maaltijd-rij" style="cursor:pointer;" onclick="openEditModal('${mt}','${etenEsc}',${info.kcal},${info.eiwitten})">
+          <div class="maaltijd-left">
+            <div class="maaltijd-naam">${mt}</div>
+            <div class="maaltijd-sub">${lines}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="maaltijd-kcal">${info.kcal} kcal</div>
+            <div style="font-size:16px;color:rgba(255,255,255,0.2);">›</div>
+          </div>
+        </div>`;
       }
       return `<div class="maaltijd-rij"><div class="maaltijd-left"><div class="maaltijd-naam" style="color:rgba(255,255,255,0.25)">${mt}</div></div><div style="font-size:13px;color:rgba(255,255,255,0.2);">—</div></div>`;
     }).join('');
@@ -963,15 +1095,23 @@ async function invoeren() {
 
     if(targetRow===-1) throw new Error(`Datum "${zoek}" of maaltijd "${selectedMaaltijd}" niet gevonden in sheet.`);
 
+    // Samenvoegen met bestaande maaltijddata
+    const bestaandEten = (rows[targetRow-1][4]||'').trim();
+    const bestaandEiwitten = parseInt(rows[targetRow-1][5])||0;
+    const bestaandKcal = parseInt(rows[targetRow-1][6])||0;
+    const nieuwEten = bestaandEten && bestaandEten !== '-' ? bestaandEten + '\n' + etenFmt : etenFmt;
+    const nieuwEiwitten = bestaandEiwitten + Number(eiwitten);
+    const nieuwKcal = bestaandKcal + Number(kcal);
+
     if(scriptUrl) {
-      await fetch(scriptUrl,{method:'POST',body:JSON.stringify({sheetId:sid,sheet:SHEET_NAME,range:`E${targetRow}:G${targetRow}`,values:[etenFmt,Number(eiwitten),Number(kcal)]})});
+      await fetch(scriptUrl,{method:'POST',body:JSON.stringify({sheetId:sid,sheet:SHEET_NAME,range:`E${targetRow}:G${targetRow}`,values:[nieuwEten,nieuwEiwitten,nieuwKcal]})});
     } else {
       const range=`${SHEET_NAME}!E${targetRow}:G${targetRow}`;
       const wr=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED&key=${gk}`,{
         method:'PUT',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({values:[[etenFmt,Number(eiwitten),Number(kcal)]]})
+        body:JSON.stringify({values:[[nieuwEten,nieuwEiwitten,nieuwKcal]]})
       });
-      if(!wr.ok){const err=await wr.json();throw new Error(err.error?.message||'Schrijffout. Voeg Apps Script URL toe bij Instellingen.');}
+      if(!wr.ok){const err=await wr.json();throw new Error(err.error?.message||'Schrijffout.');}
     }
 
     showToast(`✓ ${selectedMaaltijd} toegevoegd!`);
@@ -984,13 +1124,33 @@ async function invoeren() {
   document.getElementById('btnInvoeren').disabled=false;
 }
 
-// Hidden datum input
-const datumInput = document.createElement('input');
-datumInput.type='date'; datumInput.id='datum'; datumInput.style.display='none';
-document.body.appendChild(datumInput);
-
 init();
 </script>
 <div class="toast" id="toast"></div>
+
+<!-- Edit modal -->
+<div class="modal-overlay" id="editOverlay" onclick="sluitEditModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="editTitle">Maaltijd bewerken</div>
+    <div class="modal-kcal" id="editSubtitle"></div>
+    <div class="field" style="margin-top:14px;">
+      <label>Wat heb je gegeten?</label>
+      <textarea id="editEten" style="height:100px;"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div><label>Calorieën (kcal)</label><input type="number" id="editKcal" inputmode="numeric" style="text-align:center;font-size:18px;font-weight:600;" /></div>
+      <div><label>Eiwitten (g)</label><input type="number" id="editEiwitten" inputmode="numeric" style="text-align:center;font-size:18px;font-weight:600;" /></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn-secondary" id="editHerbereken" onclick="herberekenEdit()">🔍 Calorieën herberekenen</button>
+      <button class="btn-primary" onclick="slaEditOp()">Opslaan</button>
+      <button class="modal-close" style="color:#ff7070;border-color:rgba(255,107,107,0.3);" onclick="verwijderMaaltijd()">🗑 Maaltijd verwijderen</button>
+    </div>
+    <div class="status" id="editStatus"></div>
+    <button class="modal-close" onclick="sluitEditModal()" style="margin-top:8px;">Annuleren</button>
+  </div>
+</div>
+
 </body>
 </html>
