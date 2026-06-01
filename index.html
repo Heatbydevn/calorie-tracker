@@ -475,7 +475,7 @@ async function slaGewichtOp() {
       if ((rows[i][1]||'').toLowerCase().trim() === zoek.toLowerCase()) { targetRow=i+1; break; }
     }
     if (targetRow === -1) { showToast('✓ Gewicht bijgewerkt (lokaal)'); return; }
-    await fetch(scriptUrl, { method:'POST', body: JSON.stringify({sheetId:sid,sheet:SHEET_NAME,range:`C${targetRow}:C${targetRow}`,values:[gewicht]}) });
+    await fetch(scriptUrl, { method:'POST', body: JSON.stringify({sheetId:sid,sheet:SHEET_NAME,range:`C${targetRow}:C${targetRow}`,values:[gewicht,'','']}) });
     showToast('✓ Gewicht opgeslagen in sheet!');
     setTimeout(()=>laadDag(), 500);
   } catch(e) { showToast('✓ Gewicht bijgewerkt (lokaal)'); }
@@ -890,12 +890,20 @@ async function laadDag() {
 
     _huidigeDagData = dagData;
 
-    // Altijd gewicht card tonen - gebruik laatste bekende waarde uit localStorage als fallback
-    if (gewicht) {
-      localStorage.setItem('ct_last_gewicht', gewicht);
-      if (startGewicht) localStorage.setItem('ct_start_gewicht_val', startGewicht);
+    // Zoek meest recente gewicht uit gehele sheet (laatste rij met gewicht in kolom C)
+    let meestRecentGewicht = null;
+    for (let i = rows.length - 1; i >= 0; i--) {
+      if (rows[i][2] && rows[i][2].toString().trim()) {
+        meestRecentGewicht = rows[i][2].toString().trim();
+        break;
+      }
     }
-    const displayGewicht = gewicht || localStorage.getItem('ct_last_gewicht');
+    if (meestRecentGewicht) {
+      localStorage.setItem('ct_last_gewicht', meestRecentGewicht);
+    }
+    if (startGewicht) localStorage.setItem('ct_start_gewicht_val', startGewicht);
+
+    const displayGewicht = meestRecentGewicht || localStorage.getItem('ct_last_gewicht');
     const displayStart = startGewicht || parseFloat(localStorage.getItem('ct_start_gewicht_val'));
     if (displayGewicht) updateGewichtCard(displayGewicht, displayStart);
 
