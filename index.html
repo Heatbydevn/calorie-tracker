@@ -371,8 +371,11 @@ function isoToZoekString(iso) {
 }
 
 function updateDatumLabel(iso) {
-  const isToday = iso === getLocalIso();
-  document.getElementById('dateLabel').textContent = isToday ? 'Vandaag' : isoToDutchLabel(iso);
+  const localIso = getLocalIso();
+  const isToday = iso === localIso;
+  // Toon ISO datum zodat we kunnen debuggen
+  const label = isToday ? 'Vandaag' : isoToDutchLabel(iso);
+  document.getElementById('dateLabel').textContent = label + ' (' + iso + ')';
 }
 
 function changeDate(delta) {
@@ -546,7 +549,7 @@ async function laadDag() {
     const resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${SHEET_NAME}?key=${gk}`);
     if (!resp.ok) throw new Error('Sheet niet bereikbaar. Controleer je Google API key.');
     const rows = (await resp.json()).values||[];
-    const doel = parseInt((rows[1]&&rows[1][1])?rows[1][1]:'2300')||2300;
+    const doel = parseInt((rows[2]&&rows[2][1])?rows[2][1]:'2300')||2300;
 
     // Zoek startgewicht (eerste rij met gewicht in kolom C = index 2)
     let startGewicht = null;
