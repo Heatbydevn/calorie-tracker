@@ -211,23 +211,23 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
 
         <!-- Gewicht progressie -->
         <div class="card glass gewicht-card" id="gewichtCard" style="display:none;">
-          <div class="card-title">⚖️ Gewicht</div>
-          <div class="gewicht-top">
-            <div><div class="gewicht-lbl">Huidig</div><div class="gewicht-val" id="gewichtHuidig">—</div></div>
-            <div><div class="gewicht-lbl">Start</div><div class="gewicht-start-val" id="gewichtStart">—</div></div>
-            <div><div class="gewicht-lbl">Verschil</div><div class="gewicht-diff-val" id="gewichtDiff">—</div></div>
-          </div>
-          <div class="doel-progress-wrap">
-            <div class="doel-progress-label">
-              <span id="gewichtDoelLabel">Richting doel</span>
-              <span id="gewichtDoelPct">0%</span>
+          <div class="gw-row">
+            <div>
+              <div class="gw-lbl">Huidig</div>
+              <div class="gw-val" id="gewichtHuidig">—</div>
             </div>
-            <div class="doel-progress-bar-wrap"><div class="doel-progress-bar" id="gewichtDoelBar" style="width:0%"></div></div>
+            <div class="gw-arrow">→</div>
+            <div>
+              <div class="gw-lbl">Doel</div>
+              <div class="gw-doel" id="gewichtDoelLabel">—</div>
+            </div>
+            <div class="gewicht-diff-pill" id="gewichtDiff" style="display:none;"></div>
           </div>
+          <div class="doel-progress-bar-wrap" style="margin:12px 0 4px;"><div class="doel-progress-bar" id="gewichtDoelBar" style="width:0%"></div></div>
           <div class="doel-motivatie" id="gewichtMotivatie"></div>
           <div class="gewicht-edit">
             <input class="gewicht-input" type="text" id="gewichtInput" placeholder="Nieuw gewicht bijv. 82 kg" />
-            <button class="gewicht-btn" onclick="slaGewichtOp()">Opslaan</button>
+            <button class="gewicht-btn" onclick="slaGewichtOp()">↑</button>
           </div>
         </div>
 
