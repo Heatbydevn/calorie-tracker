@@ -603,31 +603,6 @@ async function laadWeek() {
 }
 
 
-async function slaGewichtOp() {
-  const val = document.getElementById('gewichtInput').value.trim();
-  if (!val) return;
-  const gewicht = val.includes('kg') ? val : val+' kg';
-  document.getElementById('gewichtHuidig').textContent = gewicht;
-  document.getElementById('gewichtInput').value = '';
-  const scriptUrl = localStorage.getItem('ct_appsScriptUrl')||'';
-  const sid = localStorage.getItem('ct_sheetId')||'';
-  const gk = localStorage.getItem('ct_googleKey')||'';
-  const datum = document.getElementById('datum').value;
-  if (!scriptUrl || !sid || !gk) { showToast('✓ Gewicht bijgewerkt (lokaal)'); return; }
-  try {
-    const rows = (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${SHEET_NAME}?key=${gk}`)).json()).values||[];
-    const zoek = isoToZoekString(datum);
-    let targetRow = -1;
-    for (let i=0; i<rows.length; i++) {
-      if ((rows[i][1]||'').toLowerCase().trim() === zoek.toLowerCase()) { targetRow=i+1; break; }
-    }
-    if (targetRow === -1) { showToast('✓ Gewicht bijgewerkt (lokaal)'); return; }
-    await fetch(scriptUrl, { method:'POST', body: JSON.stringify({sheetId:sid,sheet:SHEET_NAME,range:`C${targetRow}:C${targetRow}`,values:[gewicht,'','']}) });
-    showToast('✓ Gewicht opgeslagen in sheet!');
-    setTimeout(()=>laadDag(), 500);
-  } catch(e) { showToast('✓ Gewicht bijgewerkt (lokaal)'); }
-}
-
 async function laadWeek() {
   const gk = localStorage.getItem('ct_googleKey')||'';
   const sid = localStorage.getItem('ct_sheetId')||'';
@@ -1046,15 +1021,6 @@ function updateGewichtCard(huidig, startGewicht) {
   }
 
   document.getElementById('gewichtCard').style.display = 'block';
-}
-
-function slaGewichtOp() {
-  const val = document.getElementById('gewichtInput').value.trim();
-  if (!val) return;
-  const gewicht = val.includes('kg') ? val : val+' kg';
-  document.getElementById('gewichtHuidig').textContent = gewicht;
-  document.getElementById('gewichtInput').value = '';
-  // TODO: schrijf naar sheet via Apps Script
 }
 
 // ── SHEET LADEN ──
