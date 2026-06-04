@@ -488,7 +488,7 @@ async function slaGewichtOp() {
     }
     if (targetRow === -1) {
       updateGewichtCard(gewicht, parseFloat(localStorage.getItem('ct_start_gewicht_val'))||null);
-      showToast('✓ Gewicht lokaal bijgewerkt (datum niet gevonden)');
+      showToast('✗ Datum ' + isoToZoekString(datum) + ' niet gevonden');
       return;
     }
 
@@ -525,7 +525,7 @@ async function slaGewichtOp() {
       }
     }
     updateGewichtCard(gewicht, startGewicht);
-    showToast(geschreven ? '✓ Gewicht opgeslagen in sheet!' : '✓ Gewicht lokaal opgeslagen');
+    showToast(geschreven ? '✓ Gewicht opgeslagen in sheet! Rij ' + targetRow : '✗ Schrijven mislukt - lokaal opgeslagen');
     if (geschreven) setTimeout(()=>laadDag(), 800);
   } catch(e) {
     updateGewichtCard(gewicht, null);
@@ -567,7 +567,8 @@ async function laadWeek() {
         if(cel===dag.zoek.toLowerCase()){
           for(let j=i;j<rows.length;j++){
             if(j>i&&(rows[j][1]||'').toLowerCase().trim()) break;
-            if((rows[j][3]||'').trim()==='Totaal'){dag.kcal=parseInt(rows[j][6])||0;break;}
+            const wp=parseRij(rows[j]);
+            if(wp.maaltijd==='Totaal'){dag.kcal=wp.kcal;break;}
           }
           break;
         }
@@ -599,7 +600,7 @@ async function laadWeek() {
         <div class="week-stat"><div class="week-stat-num">${binnenDoel}/7</div><div class="week-stat-label">binnen doel</div></div>
         <div class="week-stat"><div class="week-stat-num">${doel.toLocaleString('nl-NL')}</div><div class="week-stat-label">dagdoel</div></div>
       </div>`;
-  } catch(e){weekContent.innerHTML=`<div class="dag-loading">Fout: ${e.message}</div>`;}
+  } catch(e){weekContent.innerHTML=`<div class="dag-loading">Fout: ${e.message}<br>Check: API key ingevuld? Sheet ID correct?</div>`;console.error('Week fout:', e);}
 }
 
 
@@ -861,6 +862,26 @@ async function verwijderMaaltijd() {
   } catch(e){el.textContent='Fout: '+e.message;el.className='status err';}
 }
 
+// Helper: parse rij correct ongeacht of gewicht kolom aanwezig is
+function parseRij(row) {
+  const col2 = (row[2]||'').toString().trim();
+  const col3 = (row[3]||'').toString().trim();
+  const col4 = (row[4]||'').toString().trim();
+  // Speciale check: Totaal rij
+  if (col4 === 'Totaal' || col3 === 'Totaal' || col2 === 'Totaal') {
+    const totaalIdx = [col2,col3,col4].indexOf('Totaal') + 2;
+    return { gewicht:'', maaltijd:'Totaal', eten:'', eiwitten:parseInt(row[totaalIdx+1])||0, kcal:parseInt(row[totaalIdx+2])||0 };
+  }
+  // Check of kolom C gewicht is (bevat kg, leeg, of alleen cijfers)
+  const isGewicht = col2 === '' || col2.toLowerCase().includes('kg') || /^[\d,.]+$/.test(col2);
+  if (isGewicht) {
+    return { gewicht: col2, maaltijd: col3, eten: row[4]||'', eiwitten: parseInt(row[5])||0, kcal: parseInt(row[6])||0 };
+  } else {
+    // Gewicht ontbreekt - alles schuift 1 op
+    return { gewicht: '', maaltijd: col2, eten: row[3]||'', eiwitten: parseInt(row[4])||0, kcal: parseInt(row[5])||0 };
+  }
+}
+
 function init() {
   const iso = getLocalIso();
   document.getElementById('datum').value = iso;
@@ -945,8 +966,9 @@ function updateStreak(rows) {
     if (!cel || cel.length < 5) continue;
     for (let j=i; j<rows.length; j++) {
       if (j>i && (rows[j][1]||'').toLowerCase().trim()) break;
-      if ((rows[j][3]||'').trim() === 'Totaal') {
-        kcalPerDag[cel] = parseInt(rows[j][6])||0;
+      const sp=parseRij(rows[j]);
+      if (sp.maaltijd === 'Totaal') {
+        kcalPerDag[cel] = sp.kcal;
         break;
       }
     }
@@ -1060,10 +1082,9 @@ async function laadDag() {
         gevonden=true;
         if (rows[i][2]) gewicht=rows[i][2];
         for (let j=i; j<rows.length; j++) {
-          // Stop als een nieuwe datum-rij begint
           if (j > i && (rows[j][1]||'').toLowerCase().trim()) break;
-          const mt=(rows[j][3]||'').trim();
-          if (MAALTIJDEN.includes(mt)) dagData[mt]={eten:rows[j][4]||'',kcal:parseInt(rows[j][6])||0,eiwitten:parseInt(rows[j][5])||0};
+          const p = parseRij(rows[j]);
+          if (MAALTIJDEN.includes(p.maaltijd)) dagData[p.maaltijd]={eten:p.eten,kcal:p.kcal,eiwitten:p.eiwitten};
         }
         break;
       }
@@ -1071,11 +1092,14 @@ async function laadDag() {
 
     _huidigeDagData = dagData;
 
-    // Zoek meest recente gewicht uit gehele sheet (laatste rij met gewicht in kolom C)
+    // Zoek meest recente gewicht via parseRij (correct omgaan met lege gewichtkolom)
     let meestRecentGewicht = null;
     for (let i = rows.length - 1; i >= 0; i--) {
-      if (rows[i][2] && rows[i][2].toString().trim()) {
-        meestRecentGewicht = rows[i][2].toString().trim();
+      const col1 = (rows[i][1]||'').toLowerCase().trim();
+      if (!col1) continue;
+      const p = parseRij(rows[i]);
+      if (p.gewicht && p.gewicht.length > 0) {
+        meestRecentGewicht = p.gewicht;
         break;
       }
     }
