@@ -109,16 +109,16 @@ body { font-family: -apple-system, 'DM Sans', sans-serif; min-height: 100vh; ove
 .invoer-datum-badge { font-size: 11px; color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
 
 /* Week chart */
-.week-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; margin-bottom: 10px; }
-.week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-.week-bar { width: 100%; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, rgba(140,90,255,0.8), rgba(80,160,255,0.6)); min-height: 3px; transition: height 0.5s cubic-bezier(0.34,1.56,0.64,1); position: relative; }
+.week-chart { display: flex; align-items: flex-end; gap: 5px; height: 100px; margin-bottom: 10px; }
+.week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.week-bar-bg { width: 100%; height: 72px; display: flex; align-items: flex-end; }
+.week-bar { width: 100%; border-radius: 5px 5px 0 0; background: linear-gradient(180deg, rgba(140,90,255,0.85), rgba(80,160,255,0.6)); min-height: 0; transition: height 0.6s cubic-bezier(0.34,1.2,0.64,1); }
 .week-bar.today { background: linear-gradient(180deg, #50dc8c, #00c6ff); }
 .week-bar.over { background: linear-gradient(180deg, #ff5050, #ff0080); }
-.week-dag { font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 500; text-transform: uppercase; }
-.week-kcal { font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 600; }
-.week-doel-lijn { height: 1px; background: rgba(255,255,255,0.15); margin-bottom: 6px; position: relative; }
-.week-doel-lijn::after { content: 'doel'; position: absolute; right: 0; top: -8px; font-size: 9px; color: rgba(255,255,255,0.25); }
-.week-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.week-dag { font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.week-dag-today { color: rgba(100,220,255,0.8) !important; }
+.week-kcal { font-size: 9px; color: rgba(255,255,255,0.35); font-weight: 600; height: 14px; display: flex; align-items: center; }
+.week-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
 .week-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 10px; text-align: center; }
 .week-stat-num { font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.85); }
 .week-stat-label { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
@@ -258,9 +258,14 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
           <div class="field">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <label style="margin-bottom:0;">Wat heb je gegeten?</label>
-              <button class="wis-btn" onclick="wisInvoer()">✕</button>
+              <div style="display:flex;gap:6px;">
+                <button class="wis-btn" onclick="openCamera()" title="Foto maken">📷</button>
+                <button class="wis-btn" onclick="wisInvoer()">✕</button>
+              </div>
             </div>
             <textarea id="eten" placeholder="kipfilet&#10;gestoomde broccoli&#10;gekookte aardappelen"></textarea>
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="analyseerFoto(event)" />
+            <div class="status" id="cameraStatus" style="margin-top:8px;"></div>
           </div>
           <div class="num-row">
             <div><label>Calorieën (kcal)</label><input type="number" id="kcal" placeholder="450" inputmode="numeric" /></div>
@@ -459,6 +464,148 @@ function goTab(n) {
 async function slaGewichtOp() {
   const val = document.getElementById('gewichtInput').value.trim();
   if (!val) return;
+  const gewicht = val.includes('kg') ? val : val + ' kg';
+  document.getElementById('gewichtInput').value = '';
+  localStorage.setItem('ct_last_gewicht', gewicht);
+
+  const scriptUrl = localStorage.getItem('ct_appsScriptUrl')||'';
+  const sid = localStorage.getItem('ct_sheetId')||'';
+  const gk = localStorage.getItem('ct_googleKey')||'';
+  const datum = document.getElementById('datum').value;
+
+  if (!sid || !gk) {
+    updateGewichtCard(gewicht, parseFloat(localStorage.getItem('ct_start_gewicht_val'))||null);
+    showToast('✓ Gewicht lokaal bijgewerkt');
+    return;
+  }
+
+  try {
+    const rows = (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${SHEET_NAME}?key=${gk}`)).json()).values||[];
+    const zoek = isoToZoekString(datum);
+    let targetRow = -1;
+    for (let i=0; i<rows.length; i++) {
+      if ((rows[i][1]||'').toLowerCase().trim() === zoek.toLowerCase()) { targetRow=i+1; break; }
+    }
+    if (targetRow === -1) {
+      updateGewichtCard(gewicht, parseFloat(localStorage.getItem('ct_start_gewicht_val'))||null);
+      showToast('✓ Gewicht lokaal bijgewerkt (datum niet gevonden)');
+      return;
+    }
+
+    let geschreven = false;
+    if (scriptUrl) {
+      try {
+        const r = await fetch(scriptUrl, {
+          method: 'POST',
+          body: JSON.stringify({sheetId:sid, sheet:SHEET_NAME, range:`C${targetRow}`, values:[[gewicht]]})
+        });
+        if (r.ok) geschreven = true;
+      } catch(e) {}
+    }
+
+    if (!geschreven) {
+      // Probeer direct via API key
+      try {
+        const range = encodeURIComponent(`${SHEET_NAME}!C${targetRow}`);
+        const wr = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${range}?valueInputOption=USER_ENTERED&key=${gk}`, {
+          method: 'PUT',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({values:[[gewicht]]})
+        });
+        if (wr.ok) geschreven = true;
+      } catch(e) {}
+    }
+
+    // Update gewicht card met meest recente startgewicht
+    let startGewicht = null;
+    for (let i=0; i<rows.length; i++) {
+      if (rows[i][2] && rows[i][2].toString().trim()) {
+        const v = parseFloat(rows[i][2].toString().replace(',','.'));
+        if (!isNaN(v)) { startGewicht=v; break; }
+      }
+    }
+    updateGewichtCard(gewicht, startGewicht);
+    showToast(geschreven ? '✓ Gewicht opgeslagen in sheet!' : '✓ Gewicht lokaal opgeslagen');
+    if (geschreven) setTimeout(()=>laadDag(), 800);
+  } catch(e) {
+    updateGewichtCard(gewicht, null);
+    showToast('✓ Gewicht lokaal bijgewerkt');
+  }
+}
+
+
+async function laadWeek() {
+  const gk = localStorage.getItem('ct_googleKey')||'';
+  const sid = localStorage.getItem('ct_sheetId')||'';
+  const weekContent = document.getElementById('weekContent');
+  if (!weekContent) return;
+  if (!gk||!sid) { weekContent.innerHTML='<div class="dag-loading">Vul API keys in bij Instellingen</div>'; return; }
+  weekContent.innerHTML='<div class="dag-loading">Laden...</div>';
+  try {
+    const rows = (await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${SHEET_NAME}?key=${gk}`)).json()).values||[];
+    const doel = parseInt((rows[2]&&rows[2][1])?rows[2][1]:'2300')||2300;
+    const today = getLocalIso();
+    const [ty,tm,td] = today.split('-').map(Number);
+
+    // Bouw 7 dagen puur wiskundig
+    const dagen = [];
+    for (let i=6; i>=0; i--) {
+      let dd=td-i, mm=tm, yy=ty;
+      if(dd<1){mm--;if(mm<1){mm=12;yy--;}const dim=new Date(yy,mm,0).getDate();dd=dim+dd;}
+      const iso=yy+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0');
+      const zoek=isoToZoekString(iso);
+      const dagIdx=zellerDag(yy,mm,dd);
+      const labels=['Zo','Ma','Di','Wo','Do','Vr','Za'];
+      dagen.push({iso,zoek,label:labels[dagIdx],isToday:iso===today,kcal:0});
+    }
+
+    // Match sheet data
+    for(let i=0;i<rows.length;i++){
+      const cel=(rows[i][1]||'').toLowerCase().trim();
+      if(!cel||cel.length<5) continue;
+      for(const dag of dagen){
+        if(cel===dag.zoek.toLowerCase()){
+          for(let j=i;j<rows.length;j++){
+            if(j>i&&(rows[j][1]||'').toLowerCase().trim()) break;
+            if((rows[j][3]||'').trim()==='Totaal'){dag.kcal=parseInt(rows[j][6])||0;break;}
+          }
+          break;
+        }
+      }
+    }
+
+    const maxKcal=Math.max(...dagen.map(d=>d.kcal),doel,1);
+    const totaalWeek=dagen.reduce((s,d)=>s+d.kcal,0);
+    const dagenMet=dagen.filter(d=>d.kcal>0);
+    const gemiddeld=dagenMet.length?Math.round(totaalWeek/dagenMet.length):0;
+    const binnenDoel=dagenMet.filter(d=>d.kcal<=doel).length;
+
+    const barsHtml=dagen.map(dag=>{
+      const pct=dag.kcal>0?(dag.kcal/maxKcal)*100:0;
+      const klasse=dag.isToday?'today':dag.kcal>doel?'over':'';
+      const kcalTxt=dag.kcal>0?dag.kcal:'';
+      return `<div class="week-bar-wrap">
+        <div class="week-kcal">${kcalTxt}</div>
+        <div class="week-bar-bg"><div class="week-bar ${klasse}" style="height:${Math.max(pct,dag.kcal>0?3:0)}%"></div></div>
+        <div class="week-dag${dag.isToday?' week-dag-today':''}">${dag.label}</div>
+      </div>`;
+    }).join('');
+
+    weekContent.innerHTML=`
+      <div class="week-chart">${barsHtml}</div>
+      <div class="week-stats">
+        <div class="week-stat"><div class="week-stat-num">${totaalWeek.toLocaleString('nl-NL')}</div><div class="week-stat-label">totaal week</div></div>
+        <div class="week-stat"><div class="week-stat-num">${gemiddeld.toLocaleString('nl-NL')}</div><div class="week-stat-label">gem. per dag</div></div>
+        <div class="week-stat"><div class="week-stat-num">${binnenDoel}/7</div><div class="week-stat-label">binnen doel</div></div>
+        <div class="week-stat"><div class="week-stat-num">${doel.toLocaleString('nl-NL')}</div><div class="week-stat-label">dagdoel</div></div>
+      </div>`;
+  } catch(e){weekContent.innerHTML=`<div class="dag-loading">Fout: ${e.message}</div>`;}
+}
+
+
+async function slaGewichtOp() {
+  const val = document.getElementById('gewichtInput').value.trim();
+  if (!val) return;
   const gewicht = val.includes('kg') ? val : val+' kg';
   document.getElementById('gewichtHuidig').textContent = gewicht;
   document.getElementById('gewichtInput').value = '';
@@ -547,6 +694,75 @@ async function laadWeek() {
         <div class="week-stat"><div class="week-stat-num">${doel.toLocaleString('nl-NL')}</div><div class="week-stat-label">dagdoel</div></div>
       </div>`;
   } catch(e) { weekContent.innerHTML=`<div class="dag-loading">Fout: ${e.message}</div>`; }
+}
+
+// ── CAMERA ──
+function openCamera() {
+  document.getElementById('cameraInput').click();
+}
+
+async function analyseerFoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const ak = localStorage.getItem('ct_anthropicKey')||'';
+  if (!ak) { 
+    const el = document.getElementById('cameraStatus');
+    el.textContent = 'Vul je Anthropic API key in bij Instellingen';
+    el.className = 'status err';
+    return;
+  }
+
+  const el = document.getElementById('cameraStatus');
+  el.textContent = 'Foto analyseren...';
+  el.className = 'status loading';
+
+  try {
+    // Convert to base64
+    const base64 = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = e => res(e.target.result.split(',')[1]);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model: 'claude-opus-4-6',
+        max_tokens: 400,
+        messages: [{
+          role: 'user',
+          content: [
+            {type:'image', source:{type:'base64', media_type:file.type, data:base64}},
+            {type:'text', text:'Wat zie je op deze foto aan eten of drinken? Geef een lijst van de items en bereken de totale calorieën en eiwitten. Geen apostrofs. Alleen JSON: {"items":["item1","item2"],"kcal":450,"eiwitten":22,"toelichting":"korte uitleg"}'}
+          ]
+        }]
+      })
+    });
+
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+    const p = safeJSON(data.content.map(b=>b.text||'').join(''));
+
+    // Vul in
+    const etenTekst = p.items.map(i => '- ' + i).join('\n');
+    document.getElementById('eten').value = etenTekst;
+    document.getElementById('kcal').value = p.kcal;
+    document.getElementById('eiwitten').value = p.eiwitten;
+    const t = document.getElementById('toelichting');
+    t.textContent = p.toelichting || '';
+    t.className = 'toelichting show';
+
+    el.textContent = '✓ Foto herkend! Controleer en pas aan indien nodig.';
+    el.className = 'status ok';
+  } catch(e) {
+    el.textContent = 'Fout bij analyseren: ' + e.message;
+    el.className = 'status err';
+  }
+
+  // Reset file input
+  event.target.value = '';
 }
 
 let _editMaaltijd = '';
@@ -763,14 +979,13 @@ function updateStreak(rows) {
   // Tel streak terug vanaf gisteren
   let streak = 0;
   let [cy,cm,cd] = today.split('-').map(Number);
-  // Check ook vandaag zelf
+  // Tel streak: vandaag + aaneengesloten dagen terug
   const todayZoek = isoToZoekString(today).toLowerCase();
   if (kcalPerDag[todayZoek] > 0) streak = 1;
-  // Ga terug in de tijd
+  // Ga terug in de tijd (pure rekenkunde)
   for (let i=0; i<60; i++) {
     cd--;
-    const dim = (mo,yr) => new Date(yr,mo,0).getDate();
-    if(cd<1){cm--;if(cm<1){cm=12;cy--;}cd=dim(cm,cy);}
+    if(cd<1){cm--;if(cm<1){cm=12;cy--;}cd=new Date(cy,cm,0).getDate();}
     const iso = cy+'-'+String(cm).padStart(2,'0')+'-'+String(cd).padStart(2,'0');
     const zoek = isoToZoekString(iso).toLowerCase();
     if (kcalPerDag[zoek] > 0) streak++;
@@ -997,7 +1212,7 @@ async function laadSuggesties(force=false) {
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,
-        messages:[{role:'user',content:`Het is ${uur}u. Ik heb nog ${rest} kcal over. Maaltijden die nog komen: ${maaltijdenTxt}. Geef 3-4 lekkere Nederlandse suggesties. Geen apostrofs. Alleen JSON: {"suggesties":[{"naam":"Naam","kcal":400,"maaltijd":"Avondeten","beschrijving":"Omschrijving"}]}`}]})
+        messages:[{role:'user',content:`Het is ${uur}u. Ik heb nog ${rest} kcal over. Maaltijden die nog komen: ${maaltijdenTxt}. Geef 3-4 gezonde eiwitrijke suggesties. Focus op: kwark, eieren, kipfilet, vis, peulvruchten, groenten, volkoren, eiwitrepen of proteïneshake als snack. Geen fastfood, frituur of ongezonde snacks. Geen apostrofs. Alleen JSON: {"suggesties":[{"naam":"Naam","kcal":400,"maaltijd":"Avondeten","beschrijving":"Omschrijving"}]}`}]})
     });
     const data=await resp.json();
     if(data.error) throw new Error(data.error.message);
