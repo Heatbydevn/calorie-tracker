@@ -108,17 +108,24 @@ body { font-family: -apple-system, 'DM Sans', sans-serif; min-height: 100vh; ove
 .dag-loading { font-size: 13px; color: rgba(255,255,255,0.3); text-align: center; padding: 20px; }
 .invoer-datum-badge { font-size: 11px; color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
 
+/* Gewicht grafiek */
+#gewichtGrafiek { overflow: visible; }
+.gw-line { fill: none; stroke: url(#gwGrad); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.gw-area { fill: url(#gwAreaGrad); }
+.gw-dot { fill: rgba(100,200,255,0.9); stroke: rgba(255,255,255,0.3); stroke-width: 1; }
+.gw-dot-active { fill: #50dc8c; r: 4; }
+
 /* Week chart */
-.week-chart { display: flex; align-items: flex-end; gap: 5px; height: 100px; margin-bottom: 10px; }
-.week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.week-bar-bg { width: 100%; height: 72px; display: flex; align-items: flex-end; }
-.week-bar { width: 100%; border-radius: 5px 5px 0 0; background: linear-gradient(180deg, rgba(140,90,255,0.85), rgba(80,160,255,0.6)); min-height: 0; transition: height 0.6s cubic-bezier(0.34,1.2,0.64,1); }
+.week-chart { display: flex; align-items: flex-end; gap: 5px; margin-bottom: 12px; }
+.week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.week-bar-bg { width: 100%; height: 70px; display: flex; align-items: flex-end; }
+.week-bar { width: 100%; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, rgba(140,90,255,0.9), rgba(80,160,255,0.6)); transition: height 0.6s cubic-bezier(0.34,1.2,0.64,1); }
 .week-bar.today { background: linear-gradient(180deg, #50dc8c, #00c6ff); }
 .week-bar.over { background: linear-gradient(180deg, #ff5050, #ff0080); }
 .week-dag { font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
 .week-dag-today { color: rgba(100,220,255,0.8) !important; }
-.week-kcal { font-size: 9px; color: rgba(255,255,255,0.35); font-weight: 600; height: 14px; display: flex; align-items: center; }
-.week-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.week-kcal { font-size: 9px; color: rgba(255,255,255,0.4); font-weight: 600; height: 13px; }
+.week-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
 .week-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 10px; text-align: center; }
 .week-stat-num { font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.85); }
 .week-stat-label { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
@@ -224,8 +231,13 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
             </div>
             <div class="gewicht-diff-pill" id="gewichtDiff" style="display:none;"></div>
           </div>
-          <div class="doel-progress-bar-wrap" style="margin:12px 0 4px;"><div class="doel-progress-bar" id="gewichtDoelBar" style="width:0%"></div></div>
+          <div class="doel-progress-bar-wrap" style="margin:10px 0 4px;"><div class="doel-progress-bar" id="gewichtDoelBar" style="width:0%"></div></div>
           <div class="doel-motivatie" id="gewichtMotivatie"></div>
+          <!-- Gewicht grafiek -->
+          <div id="gewichtGrafiekWrap" style="display:none;margin-top:14px;">
+            <div class="gw-lbl" style="margin-bottom:8px;">Verloop</div>
+            <svg id="gewichtGrafiek" width="100%" height="80" viewBox="0 0 300 80" preserveAspectRatio="none"></svg>
+          </div>
           <div class="gewicht-edit">
             <input class="gewicht-input" type="text" id="gewichtInput" placeholder="Nieuw gewicht bijv. 82 kg" />
             <button class="gewicht-btn" onclick="slaGewichtOp()">↑</button>
@@ -525,7 +537,7 @@ async function slaGewichtOp() {
       }
     }
     updateGewichtCard(gewicht, startGewicht);
-    showToast(geschreven ? '✓ Gewicht opgeslagen in sheet! Rij ' + targetRow : '✗ Schrijven mislukt - lokaal opgeslagen');
+    showToast(geschreven ? '✓ Nieuw gewicht opgeslagen!' : '✗ Schrijven mislukt - lokaal opgeslagen');
     if (geschreven) setTimeout(()=>laadDag(), 800);
   } catch(e) {
     updateGewichtCard(gewicht, null);
@@ -581,13 +593,17 @@ async function laadWeek() {
     const gemiddeld=dagenMet.length?Math.round(totaalWeek/dagenMet.length):0;
     const binnenDoel=dagenMet.filter(d=>d.kcal<=doel).length;
 
+    const barHoogte = 70; // pixels
     const barsHtml=dagen.map(dag=>{
       const pct=dag.kcal>0?(dag.kcal/maxKcal)*100:0;
+      const px=dag.kcal>0?Math.max((pct/100)*barHoogte,4):0;
       const klasse=dag.isToday?'today':dag.kcal>doel?'over':'';
-      const kcalTxt=dag.kcal>0?dag.kcal:'';
+      const kcalTxt=dag.kcal>0?(dag.kcal>=1000?Math.round(dag.kcal/100)/10+'k':dag.kcal):'';
       return `<div class="week-bar-wrap">
         <div class="week-kcal">${kcalTxt}</div>
-        <div class="week-bar-bg"><div class="week-bar ${klasse}" style="height:${Math.max(pct,dag.kcal>0?3:0)}%"></div></div>
+        <div class="week-bar-bg">
+          <div class="week-bar ${klasse}" style="height:${px}px"></div>
+        </div>
         <div class="week-dag${dag.isToday?' week-dag-today':''}">${dag.label}</div>
       </div>`;
     }).join('');
@@ -863,6 +879,46 @@ async function verwijderMaaltijd() {
 }
 
 // Helper: parse rij correct ongeacht of gewicht kolom aanwezig is
+function bouwGewichtGrafiek(gewichtData) {
+  // gewichtData = [{datum: 'woensdag 27 mei', gewicht: 124.7}, ...]
+  if (!gewichtData || gewichtData.length < 2) return;
+
+  const svg = document.getElementById('gewichtGrafiek');
+  if (!svg) return;
+  document.getElementById('gewichtGrafiekWrap').style.display = 'block';
+
+  const vals = gewichtData.map(d => d.gewicht);
+  const minV = Math.min(...vals) - 0.5;
+  const maxV = Math.max(...vals) + 0.5;
+  const W = 300, H = 80;
+  const n = gewichtData.length;
+
+  const x = (i) => (i / (n-1)) * W;
+  const y = (v) => H - ((v - minV) / (maxV - minV)) * (H - 10) - 5;
+
+  // Build path
+  const pts = gewichtData.map((d,i) => `${x(i).toFixed(1)},${y(d.gewicht).toFixed(1)}`);
+  const linePath = 'M' + pts.join(' L');
+  const areaPath = 'M' + pts[0] + ' L' + pts.slice(1).join(' L') + ` L${x(n-1)},${H} L${x(0)},${H} Z`;
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="gwGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#8c5aff"/>
+        <stop offset="100%" stop-color="#50c8ff"/>
+      </linearGradient>
+      <linearGradient id="gwAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="rgba(100,200,255,0.15)"/>
+        <stop offset="100%" stop-color="rgba(100,200,255,0)"/>
+      </linearGradient>
+    </defs>
+    <path class="gw-area" d="${areaPath}"/>
+    <path class="gw-line" d="${linePath}"/>
+    ${gewichtData.map((d,i) => `<circle class="gw-dot${i===n-1?' gw-dot-active':''}" cx="${x(i).toFixed(1)}" cy="${y(d.gewicht).toFixed(1)}" r="${i===n-1?4:3}"/>`).join('')}
+    ${gewichtData.map((d,i) => i===0||i===n-1?`<text x="${x(i).toFixed(1)}" y="${y(d.gewicht)-8}" text-anchor="${i===0?'start':'end'}" font-size="9" fill="rgba(255,255,255,0.4)">${d.gewicht.toFixed(1).replace('.',',')} kg</text>`:'').join('')}
+  `;
+}
+
 function parseRij(row) {
   const col2 = (row[2]||'').toString().trim();
   const col3 = (row[3]||'').toString().trim();
@@ -1092,16 +1148,30 @@ async function laadDag() {
 
     _huidigeDagData = dagData;
 
-    // Zoek meest recente gewicht via parseRij (correct omgaan met lege gewichtkolom)
+    // Verzamel alle gewichtsmetingen + meest recente op/voor geselecteerde dag
+    const zoekDatumGewicht = isoToZoekString(datum).toLowerCase();
     let meestRecentGewicht = null;
-    for (let i = rows.length - 1; i >= 0; i--) {
+    let voorbijGeselecteerdeDag = false;
+    const gewichtHistory = [];
+    for (let i = 0; i < rows.length; i++) {
       const col1 = (rows[i][1]||'').toLowerCase().trim();
       if (!col1) continue;
+      if (col1 === zoekDatumGewicht) voorbijGeselecteerdeDag = true;
       const p = parseRij(rows[i]);
       if (p.gewicht && p.gewicht.length > 0) {
-        meestRecentGewicht = p.gewicht;
-        break;
+        const gv = parseFloat(p.gewicht.replace(',','.'));
+        if (!isNaN(gv)) {
+          meestRecentGewicht = p.gewicht;
+          gewichtHistory.push({datum: col1, gewicht: gv});
+        }
       }
+      if (voorbijGeselecteerdeDag && col1 !== zoekDatumGewicht) break;
+    }
+    // Bouw grafiek als er meerdere metingen zijn
+    if (gewichtHistory.length >= 2) {
+      setTimeout(() => bouwGewichtGrafiek(gewichtHistory), 100);
+    } else if (document.getElementById('gewichtGrafiekWrap')) {
+      document.getElementById('gewichtGrafiekWrap').style.display = 'none';
     }
     if (meestRecentGewicht) {
       localStorage.setItem('ct_last_gewicht', meestRecentGewicht);
