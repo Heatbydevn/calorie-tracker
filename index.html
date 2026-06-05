@@ -73,7 +73,7 @@ body { font-family: -apple-system, 'DM Sans', sans-serif; min-height: 100vh; ove
 .suggestie-kcal { font-size: 13px; font-weight: 700; color: rgba(160,120,255,1); }
 .suggestie-desc { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.4; }
 .suggestie-maaltijd { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(100,200,255,0.7); margin-bottom: 3px; }
-.fav-btn { background: none; border: none; font-size: 16px; cursor: pointer; padding: 2px 4px; opacity: 0.6; transition: all 0.2s; flex-shrink: 0; }
+.fav-btn { background: none; border: none; cursor: pointer; padding: 2px 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; opacity: 0.45; transition: opacity 0.2s; }
 .fav-btn.active { opacity: 1; }
 .week-chart { display: flex; align-items: flex-end; gap: 5px; margin-bottom: 12px; }
 .week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -193,7 +193,7 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
           <div class="stats-row">
             <div class="stat-item"><div class="stat-num" id="statGegeten">&#8212;</div><div class="stat-label">gegeten</div></div>
             <div class="stat-item"><div class="stat-num" id="statEiwit">&#8212;</div><div class="stat-label">eiwit</div></div>
-            <div class="stat-item"><div class="stat-num" id="statStreak">&#128293; 0</div><div class="stat-label">streak</div></div>
+            <div class="stat-item"><div class="stat-num" id="statStreak">0</div><div class="stat-label">streak</div></div>
           </div>
         </div>
         <div class="gewicht-card glass" id="gewichtCard" style="display:none;">
@@ -221,7 +221,7 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
         </div>
         <div class="card glass" id="suggestiesCard" style="display:none;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-            <div class="card-title" style="margin-bottom:0;">&#128161; Wat kan ik nog eten?</div>
+            <div class="card-title" style="margin-bottom:0;">Wat kan ik nog eten?</div>
             <button class="dag-refresh" onclick="laadSuggesties(true)">&#8635;</button>
           </div>
           <div id="suggestiesContent"><div class="dag-loading">Laden...</div></div>
@@ -247,7 +247,7 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <label style="margin-bottom:0;">Wat heb je gegeten?</label>
               <div style="display:flex;gap:6px;">
-                <button class="wis-btn" onclick="openCamera()">&#128247;</button>
+                <button class="wis-btn" onclick="openCamera()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
                 <button class="wis-btn" onclick="wisInvoer()">&#10005;</button>
               </div>
             </div>
@@ -260,7 +260,7 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
           </div>
           <div class="toelichting" id="toelichting"></div>
           <div class="btn-group">
-            <button class="btn-secondary" id="btnOpzoeken" onclick="opzoeken()">&#128269; Calorie&#235;n automatisch opzoeken</button>
+            <button class="btn-secondary" id="btnOpzoeken" onclick="opzoeken()">Calorie&#235;n automatisch opzoeken</button>
             <button class="btn-primary" id="btnInvoeren" onclick="invoeren()">Maaltijd toevoegen</button>
           </div>
           <div class="status" id="status"></div>
@@ -277,7 +277,7 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
         </div>
         <div class="card glass">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-            <div class="card-title" style="margin-bottom:0;">&#128202; Week overzicht</div>
+            <div class="card-title" style="margin-bottom:0;">Week overzicht</div>
             <button class="dag-refresh" onclick="laadWeek()">&#8635;</button>
           </div>
           <div id="weekContent"><div class="dag-loading">Laden...</div></div>
@@ -289,7 +289,7 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
       <!-- TAB 3: Favorieten -->
       <div class="page">
         <div class="card glass">
-          <div class="card-title">&#11088; Favoriete gerechten</div>
+          <div class="card-title">Favoriete gerechten</div>
           <div class="fav-filter">
             <button class="fav-filter-btn active" onclick="filterFav('Alles',this)">Alles</button>
             <button class="fav-filter-btn" onclick="filterFav('Ontbijt',this)">Ontbijt</button>
@@ -364,9 +364,9 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
       <div><label>Eiwitten (g)</label><input type="number" id="editEiwitten" inputmode="numeric" style="text-align:center;font-size:18px;font-weight:600;" /></div>
     </div>
     <div class="btn-group">
-      <button class="btn-secondary" id="editHerbereken" onclick="herberekenEdit()">&#128269; Herberekenen</button>
+      <button class="btn-secondary" id="editHerbereken" onclick="herberekenEdit()">Herberekenen</button>
       <button class="btn-primary" onclick="slaEditOp()">Opslaan</button>
-      <button class="modal-close" style="color:#ff7070;border-color:rgba(255,107,107,0.3);" onclick="verwijderMaaltijd()">&#128465; Verwijderen</button>
+      <button class="modal-close" style="color:#ff7070;border-color:rgba(255,107,107,0.3);" onclick="verwijderMaaltijd()">Verwijderen</button>
     </div>
     <div class="status" id="editStatus"></div>
     <button class="modal-close" onclick="sluitEditModal()" style="margin-top:8px;">Annuleren</button>
@@ -406,13 +406,68 @@ function parseRij(row){
   return{gewicht:'',maaltijd:col2,eten:row[3]||'',eiwitten:parseInt(row[4])||0,kcal:parseInt(row[5])||0};
 }
 
+async function checkEnBreidUit(rows) {
+  const scriptUrl = localStorage.getItem('ct_appsScriptUrl')||'';
+  const sid = localStorage.getItem('ct_sheetId')||'';
+  if (!scriptUrl || !sid) return;
+
+  // Zoek de laatste dag met een datumnaam in kolom B
+  let laatste = null;
+  let lege = 0;
+  for (let i = 0; i < rows.length; i++) {
+    const cel = (rows[i][1]||'').toLowerCase().trim();
+    if (!cel || cel.length < 5) continue;
+    // Check of het een datumrij is (bevat dag + maand)
+    const isDatum = DAYS_NL.some(d => cel.startsWith(d));
+    if (!isDatum) continue;
+    // Check of deze dag leeg is (geen data in de maaltijdrijen)
+    let heeftData = false;
+    for (let j = i; j < Math.min(i+6, rows.length); j++) {
+      if (j > i && (rows[j][1]||'').toLowerCase().trim()) break;
+      const kcal = parseInt(rows[j][6])||0;
+      if (kcal > 0) { heeftData = true; break; }
+    }
+    if (!heeftData) lege++;
+    laatste = cel;
+  }
+
+  // Als er nog maar 1 lege dag over is, voeg een nieuwe week toe
+  if (lege <= 1 && laatste) {
+    // Bepaal de datum van de laatste dag + 1
+    // Parse de laatste datum string bijv "vrijdag 5 juni"
+    const parts = laatste.split(' ');
+    if (parts.length < 3) return;
+    const dag = parseInt(parts[1]);
+    const maandNaam = parts[2];
+    const maandIdx = MONTHS_NL.indexOf(maandNaam);
+    if (maandIdx === -1) return;
+    const jaar = new Date().getFullYear();
+    const maand = maandIdx + 1;
+
+    // Volgende dag na de laatste dag
+    let nd = dag + 1, nm = maand, ny = jaar;
+    const dim = new Date(ny, nm, 0).getDate();
+    if (nd > dim) { nd = 1; nm++; if (nm > 12) { nm = 1; ny++; } }
+    const startIso = ny + '-' + String(nm).padStart(2,'0') + '-' + String(nd).padStart(2,'0');
+
+    try {
+      const r = await fetch(scriptUrl, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'appendWeek', sheetId: sid, sheet: SHEET_NAME, startDate: startIso })
+      });
+      const result = await r.json();
+      if (result.ok) showToast('Nieuwe week toegevoegd');
+    } catch(e) {}
+  }
+}
+
 function init(){
   const iso=getLocalIso();document.getElementById('datum').value=iso;updateDatumLabel(iso);
   ['anthropicKey','googleKey','sheetId','appsScriptUrl','profielNaam','profielLeeftijd','profielLengte','profielGewichtsDoel'].forEach(f=>{const v=localStorage.getItem('ct_'+f);if(v&&document.getElementById(f))document.getElementById(f).value=v;});
   const sid=localStorage.getItem('ct_sheetId')||'1VVEAaCSI2A1j_YSIcr1lWiIDmmACVgI_1DZK0o7tTqg';
   if(document.getElementById('sheetLinkOvz'))document.getElementById('sheetLinkOvz').href=`https://docs.google.com/spreadsheets/d/${sid}/edit`;
   const naam=localStorage.getItem('ct_profielNaam');
-  if(naam)document.getElementById('heroGreeting').textContent='Hi '+naam+' \uD83D\uDC4B';
+  if(naam)document.getElementById('heroGreeting').textContent='Hi '+naam+'.'
   updateStreak();
   const cached=localStorage.getItem('ct_last_gewicht');
   if(cached)updateGewichtCard(cached,parseFloat(localStorage.getItem('ct_start_gewicht_val'))||null);
@@ -435,7 +490,7 @@ function setStatus(msg,type){const el=document.getElementById('status');el.textC
 function wisInvoer(){['eten','kcal','eiwitten'].forEach(id=>document.getElementById(id).value='');document.getElementById('toelichting').className='toelichting';document.getElementById('status').className='status';}
 
 function updateStreak(rows){
-  if(!rows){document.getElementById('statStreak').textContent='\uD83D\uDD25 '+(parseInt(localStorage.getItem('ct_streak'))||0);return;}
+  if(!rows){document.getElementById('statStreak').textContent='🔥 '+(parseInt(localStorage.getItem('ct_streak'))||0);return;}
   const today=getLocalIso();const kcalPerDag={};
   for(let i=0;i<rows.length;i++){
     const cel=(rows[i][1]||'').toLowerCase().trim();if(!cel||cel.length<5)continue;
@@ -451,7 +506,7 @@ function updateStreak(rows){
     cd--;if(cd<1){cm--;if(cm<1){cm=12;cy--;}cd=new Date(cy,cm,0).getDate();}
     if(kcalPerDag[isoToZoekString(cy+'-'+String(cm).padStart(2,'0')+'-'+String(cd).padStart(2,'0')).toLowerCase()]>0)streak++;else break;
   }
-  localStorage.setItem('ct_streak',streak);document.getElementById('statStreak').textContent='\uD83D\uDD25 '+streak;
+  localStorage.setItem('ct_streak',streak);document.getElementById('statStreak').textContent='🔥 '+streak;
 }
 
 function bumpStreak(){
@@ -461,7 +516,7 @@ function bumpStreak(){
   const yesterday=yy+'-'+String(ym).padStart(2,'0')+'-'+String(yd).padStart(2,'0');
   let streak=parseInt(localStorage.getItem('ct_streak')||'0');streak=last===yesterday?streak+1:1;
   localStorage.setItem('ct_streak',streak);localStorage.setItem('ct_streak_last',today);
-  document.getElementById('statStreak').textContent='\uD83D\uDD25 '+streak;
+  document.getElementById('statStreak').textContent='🔥 '+streak;
 }
 
 function bouwGewichtGrafiek(data){
@@ -538,6 +593,7 @@ async function laadDag(){
       }
     }
     _huidigeDagData=dagData;updateStreak(rows);
+    checkEnBreidUit(rows);
     if(!gevonden){dagContent.innerHTML='<div class="dag-loading">Geen data voor deze datum</div>';updateHero(0,doel,0);return;}
     const totKcal=Object.values(dagData).reduce((s,m)=>s+m.kcal,0);const totEiwit=Object.values(dagData).reduce((s,m)=>s+m.eiwitten,0);
     updateHero(totKcal,doel,totEiwit);
@@ -619,8 +675,8 @@ function toonFavorieten(){
   if(gefilterd.length===0){content.innerHTML='<div class="dag-loading">'+(favs.length===0?'Nog geen favorieten. Tik op \u2606 bij een suggestie!':'Geen favorieten voor '+_favFilter)+'</div>';return;}
   content.innerHTML=gefilterd.map(f=>'<div class="fav-item"><div class="fav-item-info" onclick="openSuggestie(\''+f.naam.replace(/'/g,'')+"',"+f.kcal+',\''+(f.beschrijving||'').replace(/'/g,'')+"','"+f.maaltijd+"')"+'">'+'<div class="fav-item-naam">'+f.naam+'</div><div class="fav-item-meta">'+f.maaltijd+' &middot; '+f.kcal+' kcal</div></div><div class="fav-item-kcal">'+f.kcal+'</div><button class="fav-del" onclick="verwijderFavoriet(\''+f.naam.replace(/'/g,'')+'\')">\uD83D\uDDD1</button></div>').join('');
 }
-function verwijderFavoriet(naam){saveFavorieten(getFavorieten().filter(f=>f.naam!==naam));toonFavorieten();document.querySelectorAll('.fav-btn').forEach(btn=>{if(btn.dataset.naam===naam){btn.textContent='\u2606';btn.classList.remove('active');}});showToast('Verwijderd uit favorieten');}
-function handleFavToggle(btn,naam,kcal,maaltijd,beschrijving){const isNowFav=toggleFavoriet(naam,kcal,maaltijd,beschrijving);btn.textContent=isNowFav?'\u2B50':'\u2606';btn.classList.toggle('active',isNowFav);localStorage.removeItem('ct_sug_'+document.getElementById('datum').value);}
+function verwijderFavoriet(naam){saveFavorieten(getFavorieten().filter(f=>f.naam!==naam));toonFavorieten();document.querySelectorAll('.fav-btn').forEach(btn=>{if(btn.dataset.naam===naam){btn.classList.remove('active');}});showToast('Verwijderd uit favorieten');}
+function handleFavToggle(btn,naam,kcal,maaltijd,beschrijving){const isNowFav=toggleFavoriet(naam,kcal,maaltijd,beschrijving);btn.classList.toggle('active',isNowFav);localStorage.removeItem('ct_sug_'+document.getElementById('datum').value);}
 
 async function laadSuggesties(force){
   const rest=parseInt(document.getElementById('heroNum').textContent)||0;const overDoel=document.getElementById('heroSub').textContent.includes('boven');
@@ -640,7 +696,7 @@ async function laadSuggesties(force){
     const parsed=safeJSON(data.content.map(b=>b.text||'').join(''));
     const html=parsed.suggesties.map(s=>{
       const favActief=isFavoriet(s.naam);const ne=s.naam.replace(/'/g,'');const de=(s.beschrijving||'').replace(/'/g,'');
-      return '<div class="suggestie-item"><div class="suggestie-maaltijd">'+s.maaltijd+'</div><div class="suggestie-header"><div class="suggestie-naam" onclick="openSuggestie(\''+ne+"',"+s.kcal+',\''+de+"','"+s.maaltijd+"')\">" +s.naam+'</div><div class="suggestie-kcal">'+s.kcal+' kcal</div><button class="fav-btn'+(favActief?' active':'')+'" data-naam="'+ne+'" onclick="handleFavToggle(this,\''+ne+"',"+s.kcal+',\''+s.maaltijd+'\',\''+de+"')\">"+(favActief?'\u2B50':'\u2606')+'</button></div><div class="suggestie-desc">'+s.beschrijving+' &middot; <span style="color:rgba(160,120,255,0.7);cursor:pointer;" onclick="openSuggestie(\''+ne+"',"+s.kcal+',\''+de+"','"+s.maaltijd+"')\">"+'Details &rarr;</span></div></div>';
+      return '<div class="suggestie-item"><div class="suggestie-maaltijd">'+s.maaltijd+'</div><div class="suggestie-header"><div class="suggestie-naam" onclick="openSuggestie(\''+ne+"',"+s.kcal+',\''+de+"','"+s.maaltijd+"')\">" +s.naam+'</div><div class="suggestie-kcal">'+s.kcal+' kcal</div><button class="fav-btn'+(favActief?' active':'')+'" data-naam="'+ne+'" onclick="handleFavToggle(this,\''+ne+"',"+s.kcal+',\''+s.maaltijd+'\',\''+de+"')\">"+'<svg viewBox="0 0 24 24" width="16" height="16"><path class="star-path" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" fill="none"/></svg>'+'</button></div><div class="suggestie-desc">'+s.beschrijving+' &middot; <span style="color:rgba(160,120,255,0.7);cursor:pointer;" onclick="openSuggestie(\''+ne+"',"+s.kcal+',\''+de+"','"+s.maaltijd+"')\">"+'Details &rarr;</span></div></div>';
     }).join('');
     document.getElementById('suggestiesContent').innerHTML=html;localStorage.setItem(cacheKey,html);
   }catch(e){document.getElementById('suggestiesContent').innerHTML='<div class="dag-loading">Fout: '+e.message+'</div>';}
@@ -655,7 +711,7 @@ async function openSuggestie(naam,kcal,beschrijving,maaltijd){
     const data=await resp.json();if(data.error)throw new Error(data.error.message);
     const p=safeJSON(data.content.map(b=>b.text||'').join(''));const favActief=isFavoriet(naam);
     const ne=naam.replace(/'/g,'');const de=(beschrijving||'').replace(/'/g,'');
-    document.getElementById('modalContent').innerHTML='<div class="modal-title">'+naam+'</div><div class="modal-kcal">'+kcal+' kcal &middot; '+maaltijd+'</div><div class="modal-section"><div class="modal-section-title">Ingredi&euml;nten</div><div class="modal-text">'+p.ingredienten+'</div></div><div class="modal-section"><div class="modal-section-title">Bereiding</div><div class="modal-text">'+p.bereiding+'</div></div><div class="modal-section"><div class="modal-section-title">&#128161; Tip</div><div class="modal-text">'+p.tip+'</div></div><button class="modal-close" style="background:'+(favActief?'rgba(255,180,0,0.1)':'rgba(255,255,255,0.08)')+';color:'+(favActief?'#ffb432':'rgba(255,255,255,0.7)')+'" onclick="handleFavToggle(this,\''+ne+"',"+kcal+',\''+maaltijd+'\',\''+de+"')\">"+(favActief?'\u2B50 Verwijder uit favorieten':'\u2606 Voeg toe aan favorieten')+'</button>';
+    document.getElementById('modalContent').innerHTML='<div class="modal-title">'+naam+'</div><div class="modal-kcal">'+kcal+' kcal &middot; '+maaltijd+'</div><div class="modal-section"><div class="modal-section-title">Ingredi&euml;nten</div><div class="modal-text">'+p.ingredienten+'</div></div><div class="modal-section"><div class="modal-section-title">Bereiding</div><div class="modal-text">'+p.bereiding+'</div></div><div class="modal-section"><div class="modal-section-title">Tip</div><div class="modal-text">'+p.tip+'</div></div><button class="modal-close" style="background:'+(favActief?'rgba(255,180,0,0.1)':'rgba(255,255,255,0.08)')+';color:'+(favActief?'#ffb432':'rgba(255,255,255,0.7)')+'" onclick="handleFavToggle(this,\''+ne+"',"+kcal+',\''+maaltijd+'\',\''+de+"')\">"+(favActief?'\u2B50 Verwijder uit favorieten':'\u2606 Voeg toe aan favorieten')+'</button>';
   }catch(e){document.getElementById('modalContent').innerHTML='<div class="modal-title">'+naam+'</div><div class="modal-kcal">'+kcal+' kcal &middot; '+maaltijd+'</div><div class="modal-text">'+beschrijving+'</div>';}
 }
 function sluitModal(e){if(!e||e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('open');}
