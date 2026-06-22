@@ -6,7 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Calorieën">
-<title>Calorie Tracker</title>
+<title>Calorieën</title>
+
+<rect width='512' height='512' rx='120' fill='%230a0a1a'/><circle cx='256' cy='220' r='90' fill='none' stroke='url(%23g)' stroke-width='18'/><path d='M256 130 v-30 M256 340 v30 M166 220 h-30 M376 220 h30' stroke='url(%23g)' stroke-width='14' stroke-linecap='round'/><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%238c5aff'/><stop offset='100%25' stop-color='%2350c8ff'/></linearGradient></defs></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -411,40 +413,39 @@ async function checkEnBreidUit(rows) {
   const sid = localStorage.getItem('ct_sheetId')||'';
   if (!scriptUrl || !sid) return;
 
-  // Zoek de laatste dag met een datumnaam in kolom B
+  // Zoek de LAATSTE datumrij in de sheet
   let laatste = null;
-  let lege = 0;
-  for (let i = 0; i < rows.length; i++) {
+  for (let i = rows.length - 1; i >= 0; i--) {
     const cel = (rows[i][1]||'').toLowerCase().trim();
     if (!cel || cel.length < 5) continue;
-    // Check of het een datumrij is (bevat dag + maand)
-    const isDatum = DAYS_NL.some(d => cel.startsWith(d));
-    if (!isDatum) continue;
-    // Check of deze dag leeg is (geen data in de maaltijdrijen)
-    let heeftData = false;
-    for (let j = i; j < Math.min(i+6, rows.length); j++) {
-      if (j > i && (rows[j][1]||'').toLowerCase().trim()) break;
-      const kcal = parseInt(rows[j][6])||0;
-      if (kcal > 0) { heeftData = true; break; }
-    }
-    if (!heeftData) lege++;
-    laatste = cel;
+    if (DAYS_NL.some(d => cel.startsWith(d))) { laatste = cel; break; }
   }
+  if (!laatste) return;
 
-  // Als er nog maar 1 lege dag over is, voeg een nieuwe week toe
-  if (lege <= 1 && laatste) {
-    // Bepaal de datum van de laatste dag + 1
-    // Parse de laatste datum string bijv "vrijdag 5 juni"
-    const parts = laatste.split(' ');
-    if (parts.length < 3) return;
-    const dag = parseInt(parts[1]);
-    const maandNaam = parts[2];
-    const maandIdx = MONTHS_NL.indexOf(maandNaam);
-    if (maandIdx === -1) return;
-    const jaar = new Date().getFullYear();
-    const maand = maandIdx + 1;
+  // Parse de laatste datum
+  const parts = laatste.split(' ');
+  if (parts.length < 3) return;
+  const dag = parseInt(parts[1]);
+  const maandNaam = parts[2];
+  const maandIdx = MONTHS_NL.indexOf(maandNaam);
+  if (maandIdx === -1) return;
 
-    // Volgende dag na de laatste dag
+  // Bepaal ISO van de laatste dag in de sheet
+  const jaar = new Date().getFullYear();
+  const maand = maandIdx + 1;
+  const llIso = jaar + '-' + String(maand).padStart(2,'0') + '-' + String(dag).padStart(2,'0');
+
+  // Vandaag
+  const today = getLocalIso();
+
+  // Hoeveel dagen zijn er nog over na vandaag in de sheet?
+  const llDate = new Date(llIso);
+  const todayDate = new Date(today);
+  const dagenOver = Math.round((llDate - todayDate) / 86400000);
+
+  // Voeg nieuwe week toe als er 2 of minder dagen over zijn
+  if (dagenOver <= 2) {
+    // Start de nieuwe week de dag na de laatste dag in de sheet
     let nd = dag + 1, nm = maand, ny = jaar;
     const dim = new Date(ny, nm, 0).getDate();
     if (nd > dim) { nd = 1; nm++; if (nm > 12) { nm = 1; ny++; } }
@@ -456,7 +457,11 @@ async function checkEnBreidUit(rows) {
         body: JSON.stringify({ action: 'appendWeek', sheetId: sid, sheet: SHEET_NAME, startDate: startIso })
       });
       const result = await r.json();
-      if (result.ok) showToast('Nieuwe week toegevoegd');
+      if (result.ok) {
+        showToast('Nieuwe week toegevoegd');
+        // Herlaad na 1 seconde zodat de nieuwe rijen zichtbaar zijn
+        setTimeout(() => laadDag(), 1000);
+      }
     } catch(e) {}
   }
 }
