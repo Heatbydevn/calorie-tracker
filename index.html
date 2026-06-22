@@ -75,8 +75,9 @@ body { font-family: -apple-system, 'DM Sans', sans-serif; min-height: 100vh; ove
 .suggestie-kcal { font-size: 13px; font-weight: 700; color: rgba(160,120,255,1); }
 .suggestie-desc { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.4; }
 .suggestie-maaltijd { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(100,200,255,0.7); margin-bottom: 3px; }
-.fav-btn { background: none; border: none; cursor: pointer; padding: 2px 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; opacity: 0.45; transition: opacity 0.2s; }
-.fav-btn.active { opacity: 1; }
+.fav-btn { background: none; border: none; cursor: pointer; padding: 2px 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.2s; }
+.fav-btn svg path { fill: none; stroke: rgba(255,255,255,0.4); stroke-width: 1.8; transition: all 0.2s; }
+.fav-btn.active svg path { fill: white; stroke: white; stroke-width: 1.5; }
 .week-chart { display: flex; align-items: flex-end; gap: 5px; margin-bottom: 12px; }
 .week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .week-bar-bg { width: 100%; height: 70px; display: flex; align-items: flex-end; }
@@ -116,6 +117,8 @@ textarea { resize: none; height: 80px; line-height: 1.5; }
 .btn-secondary:disabled { opacity: 0.35; }
 .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
 .wis-btn { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; width: 28px; height: 28px; color: rgba(255,255,255,0.4); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-ring { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.15); border-top-color: rgba(255,255,255,0.6); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
 .status { border-radius: 12px; padding: 12px 14px; font-size: 13px; font-weight: 500; display: none; line-height: 1.4; margin-top: 12px; }
 .status.ok { background: rgba(80,220,140,0.12); color: #50dc8c; display: block; border: 1px solid rgba(80,220,140,0.2); }
 .status.err { background: rgba(255,80,80,0.1); color: #ff7070; display: block; border: 1px solid rgba(255,80,80,0.2); }
@@ -491,7 +494,7 @@ function saveSettings(){
 }
 
 function setMaaltijd(val,btn){selectedMaaltijd=val;document.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
-function setStatus(msg,type){const el=document.getElementById('status');el.textContent=msg;el.className='status '+type;}
+function setStatus(msg,type){const el=document.getElementById('status');el.innerHTML=msg;el.className='status '+type;}
 function wisInvoer(){['eten','kcal','eiwitten'].forEach(id=>document.getElementById(id).value='');document.getElementById('toelichting').className='toelichting';document.getElementById('status').className='status';}
 
 function updateStreak(rows){
@@ -688,7 +691,7 @@ async function laadSuggesties(force){
   if(overDoel||rest<=50){document.getElementById('suggestiesCard').style.display='none';return;}
   document.getElementById('suggestiesCard').style.display='block';
   const today=document.getElementById('datum').value;const cacheKey='ct_sug_'+today;
-  if(!force&&localStorage.getItem(cacheKey)){document.getElementById('suggestiesContent').innerHTML=localStorage.getItem(cacheKey);return;}
+  // Cache verwijderd - suggesties altijd vers ophalen voor variatie
   const ak=localStorage.getItem('ct_anthropicKey')||'';
   if(!ak){document.getElementById('suggestiesContent').innerHTML='<div class="dag-loading">Vul Anthropic key in bij Instellingen</div>';return;}
   document.getElementById('suggestiesContent').innerHTML='<div class="dag-loading">Suggesties ophalen...</div>';
@@ -696,14 +699,14 @@ async function laadSuggesties(force){
   let nogTeKomen=uur<10?['Ontbijt','Lunch','Avondeten','Snack']:uur<13?['Lunch','Avondeten','Snack']:['Avondeten','Snack'];
   const maaltijdenTxt=nogTeKomen.filter(m=>!alIngevuld.includes(m)).join(', ')||nogTeKomen.join(', ');
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:'Het is '+uur+'u. Ik heb nog '+rest+' kcal over. Maaltijden die nog komen: '+maaltijdenTxt+'. Geef 3-4 gezonde eiwitrijke suggesties. Focus op: kwark, eieren, kipfilet, vis, peulvruchten, groenten, volkoren, eiwitrepen. Geen fastfood of frituur. Geen apostrofs. Alleen JSON: {"suggesties":[{"naam":"Naam","kcal":400,"maaltijd":"Avondeten","beschrijving":"Omschrijving"}]}'}]})});
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:'Het is '+uur+'u. Ik heb nog '+rest+' kcal over. Maaltijden die nog komen: '+maaltijdenTxt+'. Geef 4 gevarieerde suggesties: 2 gezonde eiwitrijke opties (kwark, eieren, kip, vis, groenten) en 2 lekkere guilty pleasures die nog binnen het budget passen. Wissel elke keer af, geen herhalingen. Geen apostrofs. Alleen JSON: {"suggesties":[{"naam":"Naam","kcal":400,"maaltijd":"Avondeten","beschrijving":"Omschrijving"}]}'}]})});
     const data=await resp.json();if(data.error)throw new Error(data.error.message);
     const parsed=safeJSON(data.content.map(b=>b.text||'').join(''));
     const html=parsed.suggesties.map(s=>{
       const favActief=isFavoriet(s.naam);const ne=s.naam.replace(/'/g,'');const de=(s.beschrijving||'').replace(/'/g,'');
       return '<div class="suggestie-item"><div class="suggestie-maaltijd">'+s.maaltijd+'</div><div class="suggestie-header"><div class="suggestie-naam" onclick="openSuggestie(\''+ne+"',"+s.kcal+',\''+de+"','"+s.maaltijd+"')\">" +s.naam+'</div><div class="suggestie-kcal">'+s.kcal+' kcal</div><button class="fav-btn'+(favActief?' active':'')+'" data-naam="'+ne+'" onclick="handleFavToggle(this,\''+ne+"',"+s.kcal+',\''+s.maaltijd+'\',\''+de+"')\">"+'<svg viewBox="0 0 24 24" width="16" height="16"><path class="star-path" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" fill="none"/></svg>'+'</button></div><div class="suggestie-desc">'+s.beschrijving+' &middot; <span style="color:rgba(160,120,255,0.7);cursor:pointer;" onclick="openSuggestie(\''+ne+"',"+s.kcal+',\''+de+"','"+s.maaltijd+"')\">"+'Details &rarr;</span></div></div>';
     }).join('');
-    document.getElementById('suggestiesContent').innerHTML=html;localStorage.setItem(cacheKey,html);
+    document.getElementById('suggestiesContent').innerHTML=html;
   }catch(e){document.getElementById('suggestiesContent').innerHTML='<div class="dag-loading">Fout: '+e.message+'</div>';}
 }
 
@@ -764,15 +767,15 @@ async function verwijderMaaltijd(){
 async function opzoeken(){
   const ak=localStorage.getItem('ct_anthropicKey')||'';const eten=document.getElementById('eten').value.trim();
   if(!eten){setStatus('Vul eerst in wat je hebt gegeten.','err');return;}if(!ak){setStatus('Vul je Anthropic API key in bij Instellingen.','err');return;}
-  setStatus('Calorie\u00ebn opzoeken...','loading');document.getElementById('btnOpzoeken').disabled=true;
+  document.getElementById('btnOpzoeken').textContent='Bezig...';setStatus('<span class="loading-ring"></span>Calorie\u00ebn opzoeken...','loading');document.getElementById('btnOpzoeken').disabled=true;
   try{const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:200,messages:[{role:'user',content:'Bereken kcal en eiwitten voor: "'+eten+'". Geen apostrofs. Alleen JSON: {"kcal":450,"eiwitten":22,"toelichting":"uitleg"}'}]})});const data=await resp.json();if(data.error)throw new Error(data.error.message);const p=safeJSON(data.content.map(b=>b.text||'').join(''));document.getElementById('kcal').value=p.kcal;document.getElementById('eiwitten').value=p.eiwitten;const t=document.getElementById('toelichting');t.textContent=p.toelichting||'';t.className='toelichting show';setStatus('Gevonden! Controleer en voer in.','ok');}catch(e){setStatus('Fout: '+e.message,'err');}
-  document.getElementById('btnOpzoeken').disabled=false;
+  document.getElementById('btnOpzoeken').textContent='Calorie\u00ebn automatisch opzoeken';document.getElementById('btnOpzoeken').disabled=false;
 }
 
 function openCamera(){document.getElementById('cameraInput').click();}
 async function analyseerFoto(event){
   const file=event.target.files[0];if(!file)return;const ak=localStorage.getItem('ct_anthropicKey')||'';
-  if(!ak){setStatus('Vul je Anthropic API key in bij Instellingen.','err');return;}setStatus('Foto analyseren...','loading');
+  if(!ak){setStatus('Vul je Anthropic API key in bij Instellingen.','err');return;}setStatus('<span class="loading-ring"></span>Foto analyseren...','loading');
   try{const base64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-opus-4-6',max_tokens:400,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:file.type,data:base64}},{type:'text',text:'Wat zie je op deze foto aan eten of drinken? Geef een lijst en bereken totale calorie\u00ebn en eiwitten. Geen apostrofs. Alleen JSON: {"items":["item1","item2"],"kcal":450,"eiwitten":22,"toelichting":"uitleg"}'}]}]})});const data=await resp.json();if(data.error)throw new Error(data.error.message);const p=safeJSON(data.content.map(b=>b.text||'').join(''));document.getElementById('eten').value=p.items.map(i=>'- '+i).join('\n');document.getElementById('kcal').value=p.kcal;document.getElementById('eiwitten').value=p.eiwitten;const t=document.getElementById('toelichting');t.textContent=p.toelichting||'';t.className='toelichting show';setStatus('Foto herkend! Controleer en pas aan.','ok');}catch(e){setStatus('Fout: '+e.message,'err');}event.target.value='';
 }
 
@@ -781,7 +784,7 @@ async function invoeren(){
   const datum=document.getElementById('datum').value;const etenRaw=document.getElementById('eten').value.trim();const kcal=document.getElementById('kcal').value;const eiwitten=document.getElementById('eiwitten').value;
   if(!etenRaw){setStatus('Vul in wat je hebt gegeten.','err');return;}if(!kcal){setStatus('Zoek eerst calorie\u00ebn op of vul ze in.','err');return;}
   const etenFmt=etenRaw.split('\n').map(r=>r.trim()).filter(r=>r).map(r=>r.startsWith('-')?r:'- '+r).join('\n');
-  setStatus('Verbinden met sheet...','loading');document.getElementById('btnInvoeren').disabled=true;
+  setStatus('<span class="loading-ring"></span>Verbinden met sheet...','loading');document.getElementById('btnInvoeren').disabled=true;
   try{
     const rows=(await(await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+sid+'/values/'+SHEET_NAME+'?key='+gk)).json()).values||[];
     const zoek=isoToZoekString(datum);let targetRow=-1;
